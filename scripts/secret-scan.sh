@@ -10,14 +10,19 @@ if [[ "$MODE" != "staged" && "$MODE" != "tracked" ]]; then
 fi
 
 has_secret_pattern() {
-  rg --quiet --pcre2 --no-messages \
-    -e 'sk-proj-[A-Za-z0-9_-]{20,}' \
-    -e 'sk-[A-Za-z0-9]{20,}' \
-    -e 'sb_secret_[A-Za-z0-9_-]{20,}' \
-    -e 'OPENAI_API_KEY\s*=\s*["'"'"']?sk-[A-Za-z0-9_-]{20,}' \
-    -e 'SUPABASE_SERVICE_ROLE_KEY\s*=\s*["'"'"']?[A-Za-z0-9._-]{20,}' \
-    -e 'APP_LOGIN_PASSWORD\s*=\s*["'"'"']?[^\s"'"'"']{8,}' \
-    -e 'UPSTASH_REDIS_REST_TOKEN\s*=\s*["'"'"']?[^\s"'"'"']{20,}'
+  if command -v rg >/dev/null 2>&1; then
+    rg --quiet --pcre2 --no-messages \
+      -e 'sk-proj-[A-Za-z0-9_-]{20,}' \
+      -e 'sk-[A-Za-z0-9]{20,}' \
+      -e 'sb_secret_[A-Za-z0-9_-]{20,}' \
+      -e 'OPENAI_API_KEY\s*=\s*["'"'"']?sk-[A-Za-z0-9_-]{20,}' \
+      -e 'SUPABASE_SERVICE_ROLE_KEY\s*=\s*["'"'"']?[A-Za-z0-9._-]{20,}' \
+      -e 'APP_LOGIN_PASSWORD\s*=\s*["'"'"']?[^\s"'"'"']{8,}' \
+      -e 'UPSTASH_REDIS_REST_TOKEN\s*=\s*["'"'"']?[^\s"'"'"']{20,}'
+  else
+    grep -E -q \
+      'sk-proj-[A-Za-z0-9_-]{20,}|sk-[A-Za-z0-9]{20,}|sb_secret_[A-Za-z0-9_-]{20,}|OPENAI_API_KEY[[:space:]]*=[[:space:]]*["'"'"']?sk-[A-Za-z0-9_-]{20,}|SUPABASE_SERVICE_ROLE_KEY[[:space:]]*=[[:space:]]*["'"'"']?[A-Za-z0-9._-]{20,}|APP_LOGIN_PASSWORD[[:space:]]*=[[:space:]]*["'"'"']?[^[:space:]"'"'"']{8,}|UPSTASH_REDIS_REST_TOKEN[[:space:]]*=[[:space:]]*["'"'"']?[^[:space:]"'"'"']{20,}'
+  fi
 }
 
 is_forbidden_env_file() {
