@@ -22,7 +22,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f3f4f6] px-4 py-8">
-      <section className="min-h-[560px] w-[94vw] rounded-2xl border border-[#e5e7eb] bg-white px-6 py-10 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] sm:w-[90vw] sm:px-8 sm:py-12 md:min-h-[620px] md:w-[74vw] md:max-w-[680px] md:px-10 md:py-16 lg:min-h-0 lg:w-1/3 lg:min-w-[430px] lg:max-w-[470px]">
+      <section className="min-h-[560px] w-[99vw] rounded-2xl border border-[#e5e7eb] bg-white px-5 py-10 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] min-[551px]:max-[767px]:w-[85vw] min-[551px]:max-[767px]:px-7 min-[551px]:max-[767px]:py-12 min-[768px]:max-[1023px]:min-h-[640px] min-[768px]:max-[1023px]:w-[80vw] min-[768px]:max-[1023px]:max-w-[820px] min-[768px]:max-[1023px]:px-10 min-[768px]:max-[1023px]:py-16 lg:min-h-0 lg:w-1/3 lg:min-w-[430px] lg:max-w-[470px] lg:px-10 lg:py-14">
         <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-[#111827]">
           <Image
             src="/mm-monogram-logo-hexagon-style-vector-27349645.avif"
@@ -96,7 +96,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           <button
             type="submit"
-            className="mt-2 h-12 w-full rounded-lg border border-[rgb(36,31,33)] bg-[rgb(36,31,33)] text-[22px] font-medium text-[#f2f2f2] cursor-pointer"
+            className="mt-4 h-12 w-full rounded-lg border border-[rgb(36,31,33)] bg-[rgb(36,31,33)] text-[22px] font-medium text-[#f2f2f2] cursor-pointer max-[550px]:mt-12 min-[551px]:max-[767px]:mt-10 min-[768px]:max-[1023px]:mt-9 lg:mt-3"
           >
             Enter
           </button>
