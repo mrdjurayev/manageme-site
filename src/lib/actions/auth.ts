@@ -1,5 +1,7 @@
 "use server";
 
+import { timingSafeEqual } from "node:crypto";
+
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -25,6 +27,21 @@ function isValidEmail(email: string): boolean {
 
 function isValidPassword(password: string): boolean {
   return password.length >= 8;
+}
+
+function secureEqual(a: string, b: string): boolean {
+  const aBuffer = Buffer.from(a);
+  const bBuffer = Buffer.from(b);
+
+  if (aBuffer.length !== bBuffer.length) {
+    return false;
+  }
+
+  return timingSafeEqual(aBuffer, bBuffer);
+}
+
+function isInvalidCredentialsErrorMessage(message: string | undefined): boolean {
+  return Boolean(message && /invalid login credentials/i.test(message));
 }
 
 function getSafeRedirectPath(value: string): string {
@@ -64,18 +81,30 @@ function getLockedAuthConfig(): LockedAuthConfig {
 
 async function findLockedUserIdByEmail(email: string): Promise<string | null> {
   const serviceRole = createServiceRoleClient();
-  const { data, error } = await serviceRole.auth.admin.listUsers({
-    page: 1,
-    perPage: 200,
-  });
+  const perPage = 200;
 
-  if (error) {
-    throw new Error("Unable to read users.");
+  for (let page = 1; page <= 50; page += 1) {
+    const { data, error } = await serviceRole.auth.admin.listUsers({
+      page,
+      perPage,
+    });
+
+    if (error) {
+      throw new Error("Unable to read users.");
+    }
+
+    const users = data.users ?? [];
+    const existingUser = users.find((user) => user.email?.toLowerCase() === email.toLowerCase());
+    if (existingUser) {
+      return existingUser.id;
+    }
+
+    if (users.length < perPage) {
+      break;
+    }
   }
 
-  const existingUser = data.users.find((user) => user.email?.toLowerCase() === email.toLowerCase());
-
-  return existingUser?.id ?? null;
+  return null;
 }
 
 async function ensureLockedUserExists(config: LockedAuthConfig): Promise<string> {
@@ -96,6 +125,10 @@ async function ensureLockedUserExists(config: LockedAuthConfig): Promise<string>
   });
 
   if (error || !data.user) {
+    const recoveredUserId = await findLockedUserIdByEmail(config.email);
+    if (recoveredUserId) {
+      return recoveredUserId;
+    }
     throw new Error("Unable to create locked user.");
   }
 
@@ -139,7 +172,7 @@ export async function signInAction(formData: FormData) {
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
-  if (login !== lockedAuth.login || password !== lockedAuth.password) {
+  if (!secureEqual(login, lockedAuth.login) || !secureEqual(password, lockedAuth.password)) {
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
@@ -159,6 +192,10 @@ export async function signInAction(formData: FormData) {
 
   if (!error) {
     redirect(redirectTo);
+  }
+
+  if (!isInvalidCredentialsErrorMessage(error.message)) {
+    redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
   try {

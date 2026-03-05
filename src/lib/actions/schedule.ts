@@ -2,15 +2,23 @@
 
 import { redirect } from "next/navigation";
 
+import { getRequiredUserId } from "@/lib/auth/get-user";
 import { createClient } from "@/lib/supabase/server";
 
 type AttendanceStatus = "present" | "absent" | "late";
 
 const ATTENDANCE_STATUSES: AttendanceStatus[] = ["present", "absent", "late"];
+const MAX_TITLE_LENGTH = 160;
+const MAX_LOCATION_LENGTH = 120;
+const MAX_NOTE_LENGTH = 400;
 
 function getValue(formData: FormData, key: string): string {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeText(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
 }
 
 function isUuid(value: string): boolean {
@@ -46,30 +54,17 @@ function toScheduleMessage(key: "error" | "message", value: string): string {
   return `/schedule?${key}=${encodeURIComponent(value)}`;
 }
 
-async function getCurrentUserIdOrRedirect(): Promise<string> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  return user.id;
-}
-
 export async function createLessonAction(formData: FormData) {
-  const userId = await getCurrentUserIdOrRedirect();
+  const userId = await getRequiredUserId();
   const supabase = await createClient();
 
   const seasonId = getValue(formData, "seasonId");
   const subjectId = getValue(formData, "subjectId");
-  const title = getValue(formData, "title");
+  const title = normalizeText(getValue(formData, "title"));
   const weekday = parseWeekday(getValue(formData, "weekday"));
   const startTime = parseTime(getValue(formData, "startTime"));
   const endTime = parseTime(getValue(formData, "endTime"));
-  const location = getValue(formData, "location");
+  const location = normalizeText(getValue(formData, "location"));
 
   if (
     !isUuid(seasonId) ||
@@ -77,7 +72,9 @@ export async function createLessonAction(formData: FormData) {
     title.length < 2 ||
     !weekday ||
     !startTime ||
-    !endTime
+    !endTime ||
+    title.length > MAX_TITLE_LENGTH ||
+    location.length > MAX_LOCATION_LENGTH
   ) {
     redirect(toScheduleMessage("error", "Dars jadvali maydonlari noto'g'ri to'ldirildi."));
   }
@@ -107,7 +104,7 @@ export async function createLessonAction(formData: FormData) {
 }
 
 export async function deleteLessonAction(formData: FormData) {
-  const userId = await getCurrentUserIdOrRedirect();
+  const userId = await getRequiredUserId();
   const supabase = await createClient();
 
   const lessonId = getValue(formData, "lessonId");
@@ -129,15 +126,15 @@ export async function deleteLessonAction(formData: FormData) {
 }
 
 export async function recordAttendanceAction(formData: FormData) {
-  const userId = await getCurrentUserIdOrRedirect();
+  const userId = await getRequiredUserId();
   const supabase = await createClient();
 
   const lessonId = getValue(formData, "lessonId");
   const lessonDate = parseDate(getValue(formData, "lessonDate"));
   const status = normalizeStatus(getValue(formData, "status"));
-  const note = getValue(formData, "note");
+  const note = normalizeText(getValue(formData, "note"));
 
-  if (!isUuid(lessonId) || !lessonDate || !status) {
+  if (!isUuid(lessonId) || !lessonDate || !status || note.length > MAX_NOTE_LENGTH) {
     redirect(toScheduleMessage("error", "Davomat maydonlari noto'g'ri to'ldirildi."));
   }
 
@@ -162,7 +159,7 @@ export async function recordAttendanceAction(formData: FormData) {
 }
 
 export async function deleteAttendanceAction(formData: FormData) {
-  const userId = await getCurrentUserIdOrRedirect();
+  const userId = await getRequiredUserId();
   const supabase = await createClient();
 
   const attendanceId = getValue(formData, "attendanceId");

@@ -2,11 +2,21 @@
 
 import { redirect } from "next/navigation";
 
+import { getRequiredUserId } from "@/lib/auth/get-user";
 import { createClient } from "@/lib/supabase/server";
+
+const MAX_SEASON_NAME_LENGTH = 120;
+const MAX_SEASON_CODE_LENGTH = 32;
+const MAX_SUBJECT_NAME_LENGTH = 120;
+const MAX_SUBJECT_CODE_LENGTH = 32;
 
 function getValue(formData: FormData, key: string): string {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizeText(value: string): string {
+  return value.replace(/\s+/g, " ").trim();
 }
 
 function toDashboardMessage(key: "error" | "message", value: string): string {
@@ -32,29 +42,21 @@ function parseDate(value: string): string | null {
   return isValid ? value : null;
 }
 
-async function getCurrentUserIdOrRedirect(): Promise<string> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  return user.id;
-}
-
 export async function createSeasonAction(formData: FormData) {
-  const userId = await getCurrentUserIdOrRedirect();
+  const userId = await getRequiredUserId();
   const supabase = await createClient();
 
-  const name = getValue(formData, "name");
+  const name = normalizeText(getValue(formData, "name"));
   const code = normalizeCode(getValue(formData, "code"));
   const startDate = parseDate(getValue(formData, "startDate"));
   const endDate = parseDate(getValue(formData, "endDate"));
 
-  if (name.length < 2 || code.length < 2) {
+  if (
+    name.length < 2 ||
+    name.length > MAX_SEASON_NAME_LENGTH ||
+    code.length < 2 ||
+    code.length > MAX_SEASON_CODE_LENGTH
+  ) {
     redirect(toDashboardMessage("error", "Season nomi va kodi to'g'ri to'ldirilishi kerak."));
   }
 
@@ -78,7 +80,7 @@ export async function createSeasonAction(formData: FormData) {
 }
 
 export async function setActiveSeasonAction(formData: FormData) {
-  const userId = await getCurrentUserIdOrRedirect();
+  const userId = await getRequiredUserId();
   const supabase = await createClient();
 
   const seasonId = getValue(formData, "seasonId");
@@ -109,7 +111,7 @@ export async function setActiveSeasonAction(formData: FormData) {
 }
 
 export async function deleteSeasonAction(formData: FormData) {
-  const userId = await getCurrentUserIdOrRedirect();
+  const userId = await getRequiredUserId();
   const supabase = await createClient();
 
   const seasonId = getValue(formData, "seasonId");
@@ -131,14 +133,20 @@ export async function deleteSeasonAction(formData: FormData) {
 }
 
 export async function createSubjectAction(formData: FormData) {
-  const userId = await getCurrentUserIdOrRedirect();
+  const userId = await getRequiredUserId();
   const supabase = await createClient();
 
   const seasonId = getValue(formData, "seasonId");
-  const name = getValue(formData, "name");
+  const name = normalizeText(getValue(formData, "name"));
   const code = normalizeCode(getValue(formData, "code"));
 
-  if (!isUuid(seasonId) || name.length < 2 || code.length < 2) {
+  if (
+    !isUuid(seasonId) ||
+    name.length < 2 ||
+    name.length > MAX_SUBJECT_NAME_LENGTH ||
+    code.length < 2 ||
+    code.length > MAX_SUBJECT_CODE_LENGTH
+  ) {
     redirect(toDashboardMessage("error", "Subject maydonlari noto'g'ri to'ldirilgan."));
   }
 
@@ -157,7 +165,7 @@ export async function createSubjectAction(formData: FormData) {
 }
 
 export async function deleteSubjectAction(formData: FormData) {
-  const userId = await getCurrentUserIdOrRedirect();
+  const userId = await getRequiredUserId();
   const supabase = await createClient();
 
   const subjectId = getValue(formData, "subjectId");

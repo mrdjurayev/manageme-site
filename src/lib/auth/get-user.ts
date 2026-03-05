@@ -16,3 +16,8 @@ export async function getRequiredUser() {
 
   return user;
 }
+
+export async function getRequiredUserId(): Promise<string> {
+  const user = await getRequiredUser();
+  return user.id;
+}

@@ -25,6 +25,9 @@ export function applySecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
   response.headers.set("X-DNS-Prefetch-Control", "off");
+  response.headers.set("Cache-Control", "no-store, max-age=0");
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Expires", "0");
 
   if (!isDev) {
     response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
