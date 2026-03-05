@@ -12,13 +12,21 @@ function isSafeRedirectPath(pathname: string): boolean {
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const { response, user } = await updateSession(request);
+  const isAuthRoute = AUTH_ROUTES.has(pathname);
 
   if (PUBLIC_ROUTES.has(pathname)) {
+    const response = NextResponse.next({ request });
     return applySecurityHeaders(response);
   }
 
-  if (!user && !AUTH_ROUTES.has(pathname)) {
+  if (isAuthRoute && request.method !== "GET") {
+    const response = NextResponse.next({ request });
+    return applySecurityHeaders(response);
+  }
+
+  const { response, user } = await updateSession(request);
+
+  if (!user && !isAuthRoute) {
     const loginUrl = new URL("/login", request.url);
     const requestedPath = `${pathname}${search}`;
 
@@ -29,7 +37,7 @@ export async function middleware(request: NextRequest) {
     return applySecurityHeaders(NextResponse.redirect(loginUrl));
   }
 
-  if (user && AUTH_ROUTES.has(pathname)) {
+  if (user && isAuthRoute) {
     return applySecurityHeaders(NextResponse.redirect(new URL("/dashboard", request.url)));
   }
 

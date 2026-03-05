@@ -1,5 +1,6 @@
 import { signInAction } from "@/lib/actions/auth";
 import Image from "next/image";
+import { SubmitButton } from "./submit-button";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -60,6 +61,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 name="login"
                 type="text"
                 autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                maxLength={64}
                 placeholder="login"
                 required
                 className="h-12 w-full rounded-lg border border-[#e5e7eb] bg-white pl-10 pr-3 text-base text-[#1f1f1f] outline-none transition-colors placeholder:text-[#6b7280] focus:border-[#6b7280]"
@@ -87,6 +92,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 type="password"
                 autoComplete="current-password"
                 minLength={8}
+                maxLength={256}
                 placeholder="password"
                 required
                 className="h-12 w-full rounded-lg border border-[#e5e7eb] bg-white pl-10 pr-3 text-base text-[#1f1f1f] outline-none transition-colors placeholder:text-[#6b7280] focus:border-[#6b7280]"
@@ -94,12 +100,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="mt-2 h-12 w-full rounded-lg border border-[rgb(36,31,33)] bg-[rgb(36,31,33)] text-[22px] font-medium text-[#f2f2f2] cursor-pointer"
-          >
-            Enter
-          </button>
+          <SubmitButton />
 
           {hasError ? (
             <p className="text-center text-sm text-[#ef4444]">Login failed. Incorrect login or password.</p>

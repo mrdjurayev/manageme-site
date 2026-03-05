@@ -168,7 +168,7 @@ export async function signInAction(formData: FormData) {
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
-  const rateLimitKey = `signin:${ip}:${login}`;
+  const rateLimitKey = `signin:${ip}`;
 
   if (!secureEqual(login, lockedAuth.login) || !secureEqual(password, lockedAuth.password)) {
     if (await isRateLimited(rateLimitKey, 8, 10 * 60 * 1000)) {
