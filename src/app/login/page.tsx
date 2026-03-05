@@ -96,7 +96,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           <button
             type="submit"
-            className="mt-2 h-12 w-full rounded-lg border border-[#2563eb] bg-[#2563eb] text-[22px] font-medium text-[#f2f2f2] cursor-pointer"
+            className="mt-2 h-12 w-full rounded-lg border border-[rgb(36,31,33)] bg-[rgb(36,31,33)] text-[22px] font-medium text-[#f2f2f2] cursor-pointer"
           >
             Enter
           </button>
