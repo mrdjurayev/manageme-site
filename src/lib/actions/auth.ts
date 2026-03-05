@@ -168,11 +168,12 @@ export async function signInAction(formData: FormData) {
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
-  if (await isRateLimited(`signin:${ip}:${login}`, 8, 10 * 60 * 1000)) {
-    redirect(toQueryMessage("/login", "error", loginErrorMessage));
-  }
+  const rateLimitKey = `signin:${ip}:${login}`;
 
   if (!secureEqual(login, lockedAuth.login) || !secureEqual(password, lockedAuth.password)) {
+    if (await isRateLimited(rateLimitKey, 8, 10 * 60 * 1000)) {
+      redirect(toQueryMessage("/login", "error", loginErrorMessage));
+    }
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
