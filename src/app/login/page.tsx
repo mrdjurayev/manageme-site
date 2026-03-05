@@ -22,7 +22,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f3f4f6] px-4 py-8">
-      <section className="min-h-[560px] w-[94vw] rounded-2xl border border-[#e5e7eb] bg-white px-6 py-10 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] sm:w-[90vw] sm:px-8 sm:py-12 md:min-h-[620px] md:w-[74vw] md:max-w-[680px] md:px-10 md:py-16 lg:min-h-0 lg:w-1/3 lg:min-w-[430px] lg:max-w-[470px]">
+      <section className="min-h-[548px] w-[94vw] rounded-2xl border border-[#e5e7eb] bg-white px-6 py-10 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] sm:w-[90vw] sm:px-8 sm:py-12 md:min-h-[620px] md:w-[74vw] md:max-w-[680px] md:px-10 md:py-16 lg:min-h-0 lg:w-1/3 lg:min-w-[430px] lg:max-w-[470px]">
         <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-[#111827]">
           <Image
             src="/mm-monogram-logo-hexagon-style-vector-27349645.avif"
