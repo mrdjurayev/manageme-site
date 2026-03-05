@@ -1,16 +1,18 @@
+import "server-only";
+
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-export default async function HomePage() {
+export async function getRequiredUser() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) {
-    redirect("/dashboard");
+  if (!user) {
+    redirect("/login");
   }
 
-  redirect("/login");
+  return user;
 }

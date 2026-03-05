@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ManageMe LMS
 
-## Getting Started
+Personal LMS for subjects, schedule, attendance, assignments, submissions, and AI-based deadline review.
 
-First, run the development server:
+## Locked Stack
+
+- Next.js (App Router) + TypeScript + Tailwind CSS
+- Supabase (Postgres + Auth + Storage)
+- Vercel deployment
+- OpenAI API for submission review
+
+## 1) Local Setup
+
+```bash
+npm install
+cp .env.example .env.local
+```
+
+Fill `.env.local`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+OPENAI_API_KEY=
+APP_LOGIN_USERNAME=
+APP_LOGIN_PASSWORD=
+APP_LOGIN_EMAIL=
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+```
+
+Run app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 2) Stack Readiness Check
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+After setting env variables, open:
 
-## Learn More
+- `GET /api/system/stack-status`
 
-To learn more about Next.js, take a look at the following resources:
+This endpoint returns whether each required key exists (without exposing secrets).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 3) Auth Security (Enabled)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Routes:
 
-## Deploy on Vercel
+- `/login`
+- `/dashboard` (protected)
+- `/schedule` (protected)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Security behavior:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Unauthenticated users are redirected to `/login`.
+- Authenticated users cannot open `/login` again.
+- Server actions re-check authenticated user for protected operations.
+- Login is locked to one configured credential pair (`APP_LOGIN_USERNAME` + `APP_LOGIN_PASSWORD`).
+- Locked login secrets are read from server env only (not hardcoded in source).
+- Security headers are attached in middleware.
+- Login server action has IP-based rate limiting. Use Upstash Redis env vars for distributed rate limiting across instances.
+- Stack diagnostic endpoint is dev-only (`/api/system/stack-status` returns 404 in production).
+
+## 4) Supabase Setup
+
+1. Create a project in Supabase.
+2. Copy project URL and anon key into `.env.local`.
+3. Copy service role key into `.env.local`.
+4. Run SQL migration file:
+   - `supabase/migrations/20260304_000001_auth_profiles.sql`
+   - `supabase/migrations/20260304_000002_seasons_subjects.sql`
+   - `supabase/migrations/20260305_000003_schedule_attendance.sql`
+5. These migrations create `profiles`, `seasons`, `subjects`, `schedule_lessons`, `attendance_records` tables with strict RLS policies.
+
+## 5) Vercel Deployment
+
+1. Push this repo to GitHub.
+2. Import project in Vercel.
+3. Add the same env vars in Vercel Project Settings.
+4. Deploy.
+5. Connect `manageme.site` in Vercel Domains.
+
+## 6) Next Implementation Milestone
+
+1. Assignment submission flow
+2. AI review flow for submissions
+
+## 7) Secret Safety (Enabled)
+
+- `.env.local` is ignored by git and cannot be committed.
+- `pre-commit` hook blocks commits that include:
+  - `.env*` files except `.env.example`
+  - OpenAI/Supabase secret-like values
+  - `APP_LOGIN_PASSWORD` value
+  - `UPSTASH_REDIS_REST_TOKEN` value
+- `pre-push` hook rescans tracked files and blocks push if a secret-like value exists.
+
+Helpful commands:
+
+```bash
+npm run setup:hooks
+npm run check:secrets
+```
