@@ -176,25 +176,25 @@ export async function signInAction(formData: FormData) {
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
+  const supabase = await createClient();
+  const signInResult = await supabase.auth.signInWithPassword({
+    email: lockedAuth.email,
+    password: lockedAuth.password,
+  });
+
+  if (!signInResult.error) {
+    redirect(redirectTo);
+  }
+
+  if (!isInvalidCredentialsErrorMessage(signInResult.error.message)) {
+    redirect(toQueryMessage("/login", "error", loginErrorMessage));
+  }
+
   let lockedUserId = "";
 
   try {
     lockedUserId = await ensureLockedUserExists(lockedAuth);
   } catch {
-    redirect(toQueryMessage("/login", "error", loginErrorMessage));
-  }
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: lockedAuth.email,
-    password: lockedAuth.password,
-  });
-
-  if (!error) {
-    redirect(redirectTo);
-  }
-
-  if (!isInvalidCredentialsErrorMessage(error.message)) {
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
