@@ -36,7 +36,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </div>
 
         <h1 className="text-center text-[clamp(1.9rem,3vw,2.65rem)] font-semibold text-[rgb(36,31,33)]">
-          Manage Me <span className="mx-1 font-light text-[#d1d5db]">|</span> Login
+          Manage Me <span className="mx-1 font-light text-[#d1d5db]">|</span> Log In
         </h1>
 
         <form action={signInAction} className="mt-10 space-y-5">
