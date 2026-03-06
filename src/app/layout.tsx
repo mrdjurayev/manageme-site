@@ -16,6 +16,14 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "ManageMe LMS",
   description: "Personal learning management system",
+  icons: {
+    icon: [
+      { url: "/icon.png?v=2", type: "image/png", sizes: "500x500" },
+      { url: "/favicon.ico?v=2", type: "image/x-icon" },
+    ],
+    shortcut: "/favicon.ico?v=2",
+    apple: "/icon.png?v=2",
+  },
 };
 
 export default function RootLayout({

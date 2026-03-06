@@ -10,7 +10,7 @@ export function SubmitButton() {
       type="submit"
       disabled={pending}
       aria-disabled={pending}
-      className="mt-2 h-12 w-full rounded-lg border border-[rgb(36,31,33)] bg-[rgb(36,31,33)] text-[22px] font-medium text-[#f2f2f2] cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+      className="mt-2 h-12 w-full rounded-lg border border-[rgb(36,31,33)] bg-[rgb(36,31,33)] text-[22px] font-medium text-[#f2f2f2] cursor-pointer outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 active:bg-[rgb(36,31,33)] hover:bg-[rgb(36,31,33)] disabled:cursor-not-allowed disabled:bg-[rgb(36,31,33)]"
     >
       {pending ? (
         <span className="inline-flex items-center justify-center" aria-label="Loading">
