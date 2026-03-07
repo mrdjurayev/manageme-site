@@ -37,10 +37,6 @@ export async function middleware(request: NextRequest) {
     return applySecurityHeaders(NextResponse.redirect(loginUrl));
   }
 
-  if (user && isAuthRoute) {
-    return applySecurityHeaders(NextResponse.redirect(new URL("/dashboard", request.url)));
-  }
-
   return applySecurityHeaders(response);
 }
 
