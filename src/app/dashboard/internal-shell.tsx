@@ -1,136 +1,140 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  BarChart3,
+  Bell,
+  BookOpen,
+  Calendar,
+  ClipboardList,
+  FileText,
+  GraduationCap,
+  HelpCircle,
+  Info,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  RotateCcw,
+  ScrollText,
+  Send,
+  Settings,
+  Video,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-type MenuItem = {
-  key: string;
-  label: string;
-  group?: string;
-};
-
-type NoticeItem = {
-  id: string;
+type Announcement = {
   title: string;
   date: string;
 };
 
-const MENU_ITEMS: MenuItem[] = [
-  { key: "dashboard", label: "Dashboard" },
-  { key: "fan-tanlovi", label: "Fan tanlovi", group: "Talaba" },
-  { key: "mening-fanlarim", label: "Mening fanlarim" },
-  { key: "dars-jadvali", label: "Dars jadvali" },
-  { key: "vazifalar", label: "Vazifalar" },
-  { key: "qayta-oqish", label: "Qayta o'qish" },
-  { key: "yakuniy", label: "Yakuniy" },
-  { key: "individual-reja", label: "Individual shaxsiy reja" },
-  { key: "malumot", label: "Ma'lumot" },
-  { key: "sorovnoma", label: "So'rovnoma" },
-  { key: "talaba-xizmatlari", label: "Talaba xizmatlari" },
+type MenuItem = {
+  name: string;
+  icon: LucideIcon;
+  section: string | null;
+};
+
+const announcements: Announcement[] = [
+  { title: "Grant taqsimoti", date: "08:08:2025" },
+  { title: "Hurmatli 4-bosqich talabalari!", date: "26:04:2025" },
+  { title: "Hurmatli 1-bosqich talabalari!", date: "03:01:2025" },
+  { title: "Hurmatli qayta o'qishda o'qiyotgan talabalar diqqatiga!", date: "19:07:2024" },
+  { title: "\"Qayta o'qish\"", date: "11:07:2024" },
+  { title: "Qayta o'qishda qatnashish sharti!", date: "01:07:2024" },
+  { title: "\"Qayta o'qish\"", date: "21:06:2024" },
+  { title: "\"Qayta o'qish\"", date: "21:06:2024" },
+  { title: "Yakuniy nazorat", date: "31:05:2024" },
 ];
 
-const NOTICE_ITEMS: NoticeItem[] = [
-  { id: "1", title: "Grant taqsimoti", date: "08.08.2025" },
-  { id: "2", title: "Hurmatli 4-bosqich talabalari!", date: "26.04.2025" },
-  { id: "3", title: "Hurmatli 1-bosqich talabalari!", date: "03.01.2025" },
-  { id: "4", title: "Hurmatli qayta o'qishda o'qiyotganlar!", date: "19.07.2024" },
-  { id: "5", title: "\"Qayta o'qish\"", date: "11.07.2024" },
-  { id: "6", title: "Qayta o'qishda qatnashish sharti!", date: "01.07.2024" },
-  { id: "7", title: "\"Qayta o'qish\"", date: "21.06.2024" },
-  { id: "8", title: "\"Qayta o'qish\"", date: "21.06.2024" },
-  { id: "9", title: "Yakuniy nazorat", date: "31.05.2024" },
+const menuItems: MenuItem[] = [
+  { name: "Dashboard", icon: LayoutDashboard, section: null },
+  { name: "Fan tanlov", icon: BookOpen, section: "TALABA" },
+  { name: "Mening fanlarim", icon: GraduationCap, section: null },
+  { name: "Dars jadvali", icon: Calendar, section: null },
+  { name: "Vazifalar", icon: ClipboardList, section: null },
+  { name: "Qayta o'qish", icon: RotateCcw, section: null },
+  { name: "Yakuniy", icon: HelpCircle, section: null },
+  { name: "Individual shaxsiy reja", icon: FileText, section: null },
+  { name: "Ma'lumot", icon: Info, section: null },
+  { name: "So'rovnoma", icon: BarChart3, section: null },
+  { name: "Talaba xizmatlari", icon: Settings, section: null },
+  { name: "Diplom ishi", icon: ScrollText, section: null },
 ];
 
-function formatServerTime(value: Date): string {
-  const date = value.toLocaleDateString("en-GB").replaceAll("/", ".");
-  const time = value.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-  return `${date} | ${time}`;
-}
-
-function MenuIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4 text-white/90" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <rect x="4" y="4" width="16" height="16" rx="3" />
-      <path d="M8 9h8M8 15h6" />
-    </svg>
-  );
+function formatServerTime(date: Date): string {
+  const day = date.toLocaleDateString("en-GB").replaceAll("/", ".");
+  const time = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  return `${day} | ${time}`;
 }
 
 export function DashboardShell() {
-  const [activeKey, setActiveKey] = useState("dashboard");
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [activeMenu, setActiveMenu] = useState("Dashboard");
+  const [currentTime, setCurrentTime] = useState(() => formatServerTime(new Date()));
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
-  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 30_000);
+    const timer = window.setInterval(() => setCurrentTime(formatServerTime(new Date())), 30_000);
     return () => window.clearInterval(timer);
   }, []);
 
-  const activeLabel = useMemo(
-    () => MENU_ITEMS.find((item) => item.key === activeKey)?.label ?? "Dashboard",
-    [activeKey],
-  );
-
-  const showCards = activeKey === "dashboard";
-
   return (
-    <main className="flex h-screen overflow-hidden bg-[#f4f7fe]">
+    <div className="flex h-screen overflow-hidden bg-[#f4f7fe] font-sans text-slate-700">
       {mobileSidebarOpen ? (
         <button
           type="button"
-          className="fixed inset-0 z-30 bg-black/30 md:hidden"
+          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
           onClick={() => setMobileSidebarOpen(false)}
-          aria-label="Close menu overlay"
+          aria-label="Close menu"
         />
       ) : null}
 
       <aside
-        className={`z-40 flex h-full flex-col bg-[#1e293b] text-gray-300 transition-all duration-200
-          ${mobileSidebarOpen ? "fixed inset-y-0 left-0 w-64" : "fixed inset-y-0 -left-72 w-64 md:left-0"}
-          ${desktopSidebarCollapsed ? "md:w-0 md:min-w-0 md:overflow-hidden md:border-r-0" : "md:w-64"}
-          md:relative md:inset-auto`}
+        className={`fixed inset-y-0 left-0 z-40 flex w-[260px] shrink-0 flex-col bg-[#1e293b] text-slate-300 shadow-xl transition-transform duration-200 lg:relative lg:translate-x-0 ${
+          mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
-        <div className="flex items-center gap-3 border-b border-gray-700 px-4 py-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white p-1">
+        <div className="flex min-h-[64px] items-center gap-3 border-b border-slate-700/50 p-4">
+          <div className="shrink-0 rounded-full bg-white p-1">
             <Image
               src="/mm-monogram-logo-hexagon-style-vector-27349645.avif"
               alt="Logo"
-              width={28}
-              height={28}
-              className="h-7 w-7 rounded object-cover"
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded object-contain"
               priority
             />
           </div>
-          <span className="text-[10px] font-bold uppercase leading-tight text-slate-100">
-            Muhammad al-Xorazmiy nomidagi TATU
-          </span>
+          <h1 className="text-[10px] font-bold uppercase leading-[1.2] tracking-tight text-white">
+            Muhammad al-Xorazmiy nomidagi Toshkent Axborot Texnologiyalari Universiteti
+          </h1>
         </div>
 
-        <nav className="mt-4 flex-1 overflow-y-auto text-sm">
-          {MENU_ITEMS.map((item, index) => {
-            const prevItem = MENU_ITEMS[index - 1];
-            const showGroup = Boolean(item.group && item.group !== prevItem?.group);
-            const isActive = item.key === activeKey;
-
+        <nav className="custom-scrollbar flex-1 overflow-y-auto py-4 text-sm">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
             return (
-              <div key={item.key}>
-                {showGroup ? (
-                  <div className="mb-1 mt-6 px-6 text-[10px] font-bold uppercase tracking-wide text-gray-500">
-                    {item.group}
+              <div key={item.name}>
+                {item.section ? (
+                  <div className="mb-2 mt-6 px-6 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    {item.section}
                   </div>
                 ) : null}
                 <button
                   type="button"
                   onClick={() => {
-                    setActiveKey(item.key);
+                    setActiveMenu(item.name);
                     setMobileSidebarOpen(false);
                   }}
-                  className={`flex w-full items-center gap-3 px-6 py-3 text-left transition hover:bg-white/10
-                    ${isActive ? "border-l-4 border-white bg-white/10 pl-5 text-white" : "text-gray-200"}`}
+                  className={`relative flex w-full items-center gap-3 px-6 py-[11px] text-left transition-all ${
+                    activeMenu === item.name
+                      ? "border-l-[3px] border-white bg-[#2d3a4f] text-white"
+                      : "border-l-[3px] border-transparent hover:bg-white/5 hover:text-white"
+                  }`}
                 >
-                  <MenuIcon />
-                  <span>{item.label}</span>
+                  <Icon size={18} className={activeMenu === item.name ? "opacity-100" : "opacity-60"} />
+                  <span className="text-[13px] font-medium tracking-wide">{item.name}</span>
                 </button>
               </div>
             );
@@ -138,76 +142,123 @@ export function DashboardShell() {
         </nav>
       </aside>
 
-      <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 items-center justify-between border-b bg-white px-4 md:px-8">
+      <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden lg:pl-0">
+        <header className="z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm md:px-8">
           <button
             type="button"
-            className="text-gray-600"
-            onClick={() => {
-              if (window.innerWidth < 768) {
-                setMobileSidebarOpen((value) => !value);
-                return;
-              }
-              setDesktopSidebarCollapsed((value) => !value);
-            }}
-            aria-label="Toggle sidebar"
+            onClick={() => setMobileSidebarOpen((value) => !value)}
+            className="rounded-md p-2 text-slate-500 transition-colors hover:bg-slate-50"
+            aria-label="Open menu"
           >
-            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
+            <Menu size={22} />
           </button>
 
-          <div className="flex items-center gap-4 md:gap-6">
-            <div className="hidden text-right md:block">
-              <p className="text-[10px] uppercase text-gray-400">Server vaqti</p>
-              <p className="text-sm font-bold text-slate-700">{formatServerTime(now)}</p>
+          <div className="flex items-center gap-7">
+            <div className="hidden text-right sm:block">
+              <p className="mb-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">Server vaqti</p>
+              <p className="text-[14px] font-bold text-slate-700">{currentTime}</p>
             </div>
-            <div className="relative text-gray-400">
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path d="M7 9a5 5 0 0 1 10 0v4l1.2 2.2a1 1 0 0 1-.88 1.48H6.68a1 1 0 0 1-.88-1.48L7 13V9Z" />
-                <path d="M10 18a2 2 0 0 0 4 0" />
-              </svg>
-              <span className="absolute -right-1 -top-1 inline-grid h-4 w-4 place-items-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                1
-              </span>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsNotifOpen((value) => !value);
+                  setIsProfileOpen(false);
+                }}
+                className={`relative p-1.5 transition-colors ${
+                  isNotifOpen ? "text-blue-600" : "text-slate-400 hover:text-blue-500"
+                }`}
+                aria-label="Notifications"
+              >
+                <Bell size={22} />
+                <span className="absolute right-1 top-1 flex h-[17px] w-[17px] items-center justify-center rounded-full border-2 border-white bg-[#f44336] text-[9px] font-bold text-white">
+                  1
+                </span>
+              </button>
+
+              {isNotifOpen ? (
+                <div className="absolute right-[-10px] mt-4 w-[320px] overflow-hidden rounded-md border border-slate-100 bg-white shadow-2xl">
+                  <div className="bg-[#242e4c] p-3 text-[13px] font-bold text-white">Xabarnomalar</div>
+                  <div className="flex cursor-pointer gap-4 border-b border-slate-50 p-4 hover:bg-slate-50">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[#f0f2f5] text-slate-500">
+                      <FileText size={20} />
+                    </div>
+                    <div className="flex flex-col">
+                      <p className="text-[13px] font-bold leading-tight text-blue-500">amaliy ish (Tahdid razvedkasi)</p>
+                      <p className="mt-1 text-[12px] font-medium text-slate-600">Muddatgacha 4 kun qoldi</p>
+                      <p className="mt-1 text-[11px] font-semibold uppercase tracking-tighter text-slate-300">
+                        11-03-26 23:59:59
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
-            <svg
-              viewBox="0 0 24 24"
-              className="h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            >
-              <rect x="3" y="7" width="12" height="10" rx="2" />
-              <path d="M15 10l6-3v10l-6-3" />
-            </svg>
-            <div className="h-10 w-10 overflow-hidden rounded-lg border bg-white">
-              <Image
-                src="/mm-monogram-logo-hexagon-style-vector-27349645.avif"
-                alt="User"
-                width={40}
-                height={40}
-                className="h-full w-full object-cover"
-              />
+
+            <button type="button" className="p-1.5 text-slate-400 transition-colors hover:text-blue-500" aria-label="Video">
+              <Video size={22} />
+            </button>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsProfileOpen((value) => !value);
+                  setIsNotifOpen(false);
+                }}
+                className="flex items-center focus:outline-none"
+                aria-label="Profile menu"
+              >
+                <Image
+                  src="/mm-monogram-logo-hexagon-style-vector-27349645.avif"
+                  alt="User"
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 rounded-lg border border-slate-200 object-cover shadow-sm"
+                />
+              </button>
+
+              {isProfileOpen ? (
+                <div className="absolute right-0 mt-4 w-52 overflow-hidden rounded-md border border-slate-100 bg-white shadow-2xl">
+                  <div className="bg-[#242e4c] p-3.5 text-white">
+                    <p className="text-[13px] font-bold uppercase leading-tight tracking-wide">Oktyabrov</p>
+                    <p className="text-[12px] font-medium opacity-80">Shaxobiddin</p>
+                  </div>
+                  <div className="py-1">
+                    <button className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-[13px] text-slate-600 transition-colors hover:bg-slate-50">
+                      <Settings size={15} className="text-slate-400" /> Profil sozlamalari
+                    </button>
+                    <button className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-[13px] text-slate-600 transition-colors hover:bg-slate-50">
+                      <LogOut size={15} className="text-slate-400" /> Chiqish
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-8">
-          {showCards ? (
+        <div className="custom-scrollbar flex-1 overflow-y-auto bg-[#f4f7fe] p-4 md:p-8">
+          {activeMenu === "Dashboard" ? (
             <>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {NOTICE_ITEMS.map((item) => (
-                  <article key={item.id} className="flex h-44 flex-col justify-between rounded-xl bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {announcements.map((item) => (
+                  <article
+                    key={`${item.title}-${item.date}`}
+                    className="flex h-[185px] flex-col justify-between rounded-xl border border-slate-100 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md"
+                  >
                     <div>
-                      <h3 className="leading-tight font-bold text-slate-800">{item.title}</h3>
-                      <p className="mt-1 text-sm text-gray-500">{item.title}</p>
+                      <h3 className="text-[14px] font-bold uppercase leading-snug tracking-tight text-[#242e4c]">
+                        {item.title}
+                      </h3>
+                      <p className="mt-2 text-[13px] text-slate-500">{item.title}</p>
                     </div>
-                    <div className="flex items-end justify-between">
-                      <span className="text-xs font-semibold tracking-wider text-gray-300">{item.date}</span>
+                    <div className="flex items-end justify-between pt-4">
+                      <span className="text-[12px] font-bold uppercase tracking-[1.5px] text-slate-200">{item.date}</span>
                       <button
                         type="button"
-                        className="rounded bg-[#242e4c] px-4 py-2 text-xs text-white shadow transition hover:bg-slate-700"
+                        className="rounded-sm bg-[#242e4c] px-5 py-2 text-[11px] font-bold uppercase tracking-tight text-white shadow-sm transition-all hover:bg-slate-800 active:scale-95"
                       >
                         Batafsil
                       </button>
@@ -216,29 +267,51 @@ export function DashboardShell() {
                 ))}
               </div>
 
-              <div className="mt-6 flex justify-end gap-2 text-sm font-medium text-gray-500">
-                <span className="cursor-pointer">« Oldingi</span>
-                <span className="cursor-pointer">Keyingi »</span>
+              <div className="mt-8 flex justify-end gap-3 text-[13px] font-bold text-slate-400">
+                <button type="button" className="transition-colors hover:text-slate-700">
+                  « Oldingi
+                </button>
+                <button type="button" className="transition-colors hover:text-slate-700">
+                  Keyingi »
+                </button>
               </div>
             </>
           ) : (
-            <section className="rounded-xl bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
-              <h2 className="text-xl font-semibold text-slate-800">{activeLabel}</h2>
-              <p className="mt-2 text-sm text-gray-500">Bu bo&apos;lim keyingi bosqichda shu layout ichida quriladi.</p>
-            </section>
+            <div className="flex h-full flex-col">
+              <h2 className="mb-6 text-2xl font-light uppercase tracking-wide text-slate-500">Video Qo&apos;llanma</h2>
+              <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white/50 italic text-slate-400">
+                Bu bo&apos;lim bo&apos;sh
+              </div>
+            </div>
           )}
         </div>
-      </section>
 
-      <button
-        type="button"
-        aria-label="Telegram"
-        className="fixed bottom-6 right-6 inline-grid h-10 w-10 place-items-center rounded-full bg-blue-900 text-white shadow-lg"
-      >
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-          <path d="M21.5 4.8a1 1 0 0 0-1.06-.16L3.4 11.5a1 1 0 0 0 .08 1.88l4.6 1.54 1.69 4.95a1 1 0 0 0 1.83.19l2.35-3.2 4.38 3.22a1 1 0 0 0 1.56-.55l2.52-13.63a1 1 0 0 0-.4-1.1ZM9.6 14.24l8.63-6.85-6.67 7.97-.68 1.48-1.28-2.6Z" />
-        </svg>
-      </button>
-    </main>
+        <div className="fixed bottom-6 right-6 z-50">
+          <button
+            type="button"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-[#242e4c] text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+            aria-label="Send"
+          >
+            <Send size={20} fill="currentColor" className="-ml-[2px] mt-[1px]" />
+          </button>
+        </div>
+      </main>
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+      `}</style>
+    </div>
   );
 }
