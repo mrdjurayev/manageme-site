@@ -93,13 +93,13 @@ export function DashboardShell() {
 
       <header className="z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm md:px-8">
         <div className="flex min-w-0 items-center gap-3 md:gap-4">
-          <div className="shrink-0 rounded-full bg-white p-1 ring-1 ring-slate-200">
+          <div className="shrink-0 p-0">
             <Image
               src="/manageme-white.png"
               alt="Logo"
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded object-contain"
+              width={44}
+              height={44}
+              className="h-11 w-11 object-contain"
               priority
             />
           </div>
@@ -240,7 +240,7 @@ export function DashboardShell() {
                     <Icon size={18} className={activeMenu === item.name ? "opacity-100" : "opacity-60"} />
                     <span className="text-[13px] font-medium tracking-wide">{item.name}</span>
                   </button>
-                  {item.name === "Dashboard" ? <div className="mt-3 h-px w-full bg-[rgb(143,162,186)]" /> : null}
+                  {item.name === "Dashboard" ? <div className="mt-4 h-[0.5px] w-full bg-[rgb(143,162,186)]" /> : null}
                 </div>
               );
             })}
