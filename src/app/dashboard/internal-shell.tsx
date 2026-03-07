@@ -95,11 +95,11 @@ export function DashboardShell() {
         <div className="flex min-w-0 items-center gap-3 md:gap-4">
           <div className="shrink-0 rounded-full bg-white p-1 ring-1 ring-slate-200">
             <Image
-              src="/mm-monogram-logo-hexagon-style-vector-27349645.avif"
+              src="/manageme-white.png"
               alt="Logo"
               width={36}
               height={36}
-              className="h-9 w-9 rounded object-cover"
+              className="h-9 w-9 rounded object-contain"
               priority
             />
           </div>
@@ -240,7 +240,7 @@ export function DashboardShell() {
                     <Icon size={18} className={activeMenu === item.name ? "opacity-100" : "opacity-60"} />
                     <span className="text-[13px] font-medium tracking-wide">{item.name}</span>
                   </button>
-                  {item.name === "Dashboard" ? <div className="mt-1 h-px w-full bg-[#33497d]" /> : null}
+                  {item.name === "Dashboard" ? <div className="mt-3 h-px w-full bg-[rgb(143,162,186)]" /> : null}
                 </div>
               );
             })}
