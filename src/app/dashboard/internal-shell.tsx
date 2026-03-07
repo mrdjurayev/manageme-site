@@ -12,13 +12,12 @@ type MenuItem = {
 type NoticeItem = {
   id: string;
   title: string;
-  excerpt: string;
   date: string;
 };
 
 const MENU_ITEMS: MenuItem[] = [
   { key: "dashboard", label: "Dashboard" },
-  { key: "fan-tanlov", label: "Fan tanlov", group: "TALABA" },
+  { key: "fan-tanlovi", label: "Fan tanlovi", group: "Talaba" },
   { key: "mening-fanlarim", label: "Mening fanlarim" },
   { key: "dars-jadvali", label: "Dars jadvali" },
   { key: "vazifalar", label: "Vazifalar" },
@@ -31,15 +30,15 @@ const MENU_ITEMS: MenuItem[] = [
 ];
 
 const NOTICE_ITEMS: NoticeItem[] = [
-  { id: "n1", title: "Grant taqsimoti", excerpt: "Grant taqsimoti", date: "08:08:2025" },
-  { id: "n2", title: "Hurmatli 4-bosqich talabalari!", excerpt: "Hurmatli 4-bosqich talabalari!", date: "26:04:2025" },
-  { id: "n3", title: "Hurmatli 1-bosqich talabalari!", excerpt: "Hurmatli 1-bosqich talabalari!", date: "03:01:2025" },
-  { id: "n4", title: "Hurmatli qayta o'qishda o'qiyotgan talabalar diqqatiga!", excerpt: "Hurmatli qayta o'qishda o'qiyotgan talabalar diqqatiga!", date: "19:07:2024" },
-  { id: "n5", title: "\"Qayta o'qish\"", excerpt: "\"Qayta o'qish\"", date: "11:07:2024" },
-  { id: "n6", title: "Qayta o'qishda qatnashish shart!", excerpt: "Qayta o'qishda qatnashish shart!", date: "01:07:2024" },
-  { id: "n7", title: "\"Qayta o'qish\"", excerpt: "\"Qayta o'qish\"", date: "21:06:2024" },
-  { id: "n8", title: "\"Qayta o'qish\"", excerpt: "\"Qayta o'qish\"", date: "21:06:2024" },
-  { id: "n9", title: "Yakuniy nazorat", excerpt: "Yakuniy nazorat", date: "31:05:2024" },
+  { id: "1", title: "Grant taqsimoti", date: "08.08.2025" },
+  { id: "2", title: "Hurmatli 4-bosqich talabalari!", date: "26.04.2025" },
+  { id: "3", title: "Hurmatli 1-bosqich talabalari!", date: "03.01.2025" },
+  { id: "4", title: "Hurmatli qayta o'qishda o'qiyotganlar!", date: "19.07.2024" },
+  { id: "5", title: "\"Qayta o'qish\"", date: "11.07.2024" },
+  { id: "6", title: "Qayta o'qishda qatnashish sharti!", date: "01.07.2024" },
+  { id: "7", title: "\"Qayta o'qish\"", date: "21.06.2024" },
+  { id: "8", title: "\"Qayta o'qish\"", date: "21.06.2024" },
+  { id: "9", title: "Yakuniy nazorat", date: "31.05.2024" },
 ];
 
 function formatServerTime(value: Date): string {
@@ -48,9 +47,19 @@ function formatServerTime(value: Date): string {
   return `${date} | ${time}`;
 }
 
+function MenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4 text-white/90" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="4" y="4" width="16" height="16" rx="3" />
+      <path d="M8 9h8M8 15h6" />
+    </svg>
+  );
+}
+
 export function DashboardShell() {
   const [activeKey, setActiveKey] = useState("dashboard");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -58,412 +67,178 @@ export function DashboardShell() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const activeLabel = useMemo(() => {
-    return MENU_ITEMS.find((item) => item.key === activeKey)?.label ?? "Dashboard";
-  }, [activeKey]);
+  const activeLabel = useMemo(
+    () => MENU_ITEMS.find((item) => item.key === activeKey)?.label ?? "Dashboard",
+    [activeKey],
+  );
+
+  const showCards = activeKey === "dashboard";
 
   return (
-    <main className="shell">
-      <header className="topbar">
-        <div className="brand">
-          <div className="brand-logo">
+    <main className="flex h-screen overflow-hidden bg-[#f4f7fe]">
+      {mobileSidebarOpen ? (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-black/30 md:hidden"
+          onClick={() => setMobileSidebarOpen(false)}
+          aria-label="Close menu overlay"
+        />
+      ) : null}
+
+      <aside
+        className={`z-40 flex h-full flex-col bg-[#1e293b] text-gray-300 transition-all duration-200
+          ${mobileSidebarOpen ? "fixed inset-y-0 left-0 w-64" : "fixed inset-y-0 -left-72 w-64 md:left-0"}
+          ${desktopSidebarCollapsed ? "md:w-0 md:min-w-0 md:overflow-hidden md:border-r-0" : "md:w-64"}
+          md:relative md:inset-auto`}
+      >
+        <div className="flex items-center gap-3 border-b border-gray-700 px-4 py-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white p-1">
             <Image
               src="/mm-monogram-logo-hexagon-style-vector-27349645.avif"
-              alt="Manage Me logo"
-              width={44}
-              height={44}
-              className="logo-img"
+              alt="Logo"
+              width={28}
+              height={28}
+              className="h-7 w-7 rounded object-cover"
               priority
             />
           </div>
-          <p className="brand-text">MUHAMMAD AL-XORAZMIY NOMIDAGI TOSHKENT AXBOROT TEXNOLOGIYALARI UNIVERSITETI</p>
+          <span className="text-[10px] font-bold uppercase leading-tight text-slate-100">
+            Muhammad al-Xorazmiy nomidagi TATU
+          </span>
         </div>
 
-        <button
-          type="button"
-          className="menu-trigger"
-          onClick={() => setIsSidebarOpen((value) => !value)}
-          aria-label="Toggle menu"
-          aria-expanded={isSidebarOpen}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M4 7h16M4 12h16M4 17h16" />
-          </svg>
-        </button>
+        <nav className="mt-4 flex-1 overflow-y-auto text-sm">
+          {MENU_ITEMS.map((item, index) => {
+            const prevItem = MENU_ITEMS[index - 1];
+            const showGroup = Boolean(item.group && item.group !== prevItem?.group);
+            const isActive = item.key === activeKey;
 
-        <div className="top-actions">
-          <div className="server-time">
-            <span>Server vaqti</span>
-            <strong>{formatServerTime(now)}</strong>
-          </div>
-          <button type="button" className="icon-btn" aria-label="Notifications">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M7 9a5 5 0 0 1 10 0v4l1.2 2.2a1 1 0 0 1-.88 1.48H6.68a1 1 0 0 1-.88-1.48L7 13V9Z" />
-              <path d="M10 18a2 2 0 0 0 4 0" />
+            return (
+              <div key={item.key}>
+                {showGroup ? (
+                  <div className="mb-1 mt-6 px-6 text-[10px] font-bold uppercase tracking-wide text-gray-500">
+                    {item.group}
+                  </div>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveKey(item.key);
+                    setMobileSidebarOpen(false);
+                  }}
+                  className={`flex w-full items-center gap-3 px-6 py-3 text-left transition hover:bg-white/10
+                    ${isActive ? "border-l-4 border-white bg-white/10 pl-5 text-white" : "text-gray-200"}`}
+                >
+                  <MenuIcon />
+                  <span>{item.label}</span>
+                </button>
+              </div>
+            );
+          })}
+        </nav>
+      </aside>
+
+      <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="flex h-16 items-center justify-between border-b bg-white px-4 md:px-8">
+          <button
+            type="button"
+            className="text-gray-600"
+            onClick={() => {
+              if (window.innerWidth < 768) {
+                setMobileSidebarOpen((value) => !value);
+                return;
+              }
+              setDesktopSidebarCollapsed((value) => !value);
+            }}
+            aria-label="Toggle sidebar"
+          >
+            <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M4 7h16M4 12h16M4 17h16" />
             </svg>
-            <span className="notif-dot">1</span>
           </button>
-          <button type="button" className="icon-btn" aria-label="Video">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+
+          <div className="flex items-center gap-4 md:gap-6">
+            <div className="hidden text-right md:block">
+              <p className="text-[10px] uppercase text-gray-400">Server vaqti</p>
+              <p className="text-sm font-bold text-slate-700">{formatServerTime(now)}</p>
+            </div>
+            <div className="relative text-gray-400">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M7 9a5 5 0 0 1 10 0v4l1.2 2.2a1 1 0 0 1-.88 1.48H6.68a1 1 0 0 1-.88-1.48L7 13V9Z" />
+                <path d="M10 18a2 2 0 0 0 4 0" />
+              </svg>
+              <span className="absolute -right-1 -top-1 inline-grid h-4 w-4 place-items-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                1
+              </span>
+            </div>
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
               <rect x="3" y="7" width="12" height="10" rx="2" />
               <path d="M15 10l6-3v10l-6-3" />
             </svg>
-          </button>
-          <button type="button" className="avatar-btn" aria-label="Profile">
-            <Image
-              src="/mm-monogram-logo-hexagon-style-vector-27349645.avif"
-              alt="Profile"
-              width={36}
-              height={36}
-              className="avatar-img"
-            />
-          </button>
-        </div>
-      </header>
+            <div className="h-10 w-10 overflow-hidden rounded-lg border bg-white">
+              <Image
+                src="/mm-monogram-logo-hexagon-style-vector-27349645.avif"
+                alt="User"
+                width={40}
+                height={40}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </div>
+        </header>
 
-      <div className="layout">
-        <aside className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
-          <nav className="menu-list">
-            {MENU_ITEMS.map((item, index) => {
-              const prev = MENU_ITEMS[index - 1];
-              const showGroup = Boolean(item.group && item.group !== prev?.group);
-              const isActive = item.key === activeKey;
-
-              return (
-                <div key={item.key}>
-                  {showGroup ? <p className="menu-group">{item.group}</p> : null}
-                  <button
-                    type="button"
-                    className={`menu-item ${isActive ? "active" : ""}`}
-                    onClick={() => {
-                      setActiveKey(item.key);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    <span className="menu-icon" />
-                    <span>{item.label}</span>
-                  </button>
-                </div>
-              );
-            })}
-          </nav>
-        </aside>
-
-        <section className="content">
-          {activeKey === "dashboard" ? (
+        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          {showCards ? (
             <>
-              <div className="notice-grid">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {NOTICE_ITEMS.map((item) => (
-                  <article key={item.id} className="notice-card">
-                    <h3>{item.title}</h3>
-                    <p>{item.excerpt}</p>
-                    <div className="notice-footer">
-                      <span>{item.date}</span>
-                      <button type="button">Batafsil</button>
+                  <article key={item.id} className="flex h-44 flex-col justify-between rounded-xl bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+                    <div>
+                      <h3 className="leading-tight font-bold text-slate-800">{item.title}</h3>
+                      <p className="mt-1 text-sm text-gray-500">{item.title}</p>
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <span className="text-xs font-semibold tracking-wider text-gray-300">{item.date}</span>
+                      <button
+                        type="button"
+                        className="rounded bg-[#242e4c] px-4 py-2 text-xs text-white shadow transition hover:bg-slate-700"
+                      >
+                        Batafsil
+                      </button>
                     </div>
                   </article>
                 ))}
               </div>
-              <p className="pager">« Oldingi Keyingi »</p>
+
+              <div className="mt-6 flex justify-end gap-2 text-sm font-medium text-gray-500">
+                <span className="cursor-pointer">« Oldingi</span>
+                <span className="cursor-pointer">Keyingi »</span>
+              </div>
             </>
           ) : (
-            <div className="module-empty">
-              <h2>{activeLabel}</h2>
-              <p>Ushbu bo&apos;lim shu skelet asosida keyingi bosqichda to&apos;liq quriladi.</p>
-            </div>
+            <section className="rounded-xl bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+              <h2 className="text-xl font-semibold text-slate-800">{activeLabel}</h2>
+              <p className="mt-2 text-sm text-gray-500">Bu bo&apos;lim keyingi bosqichda shu layout ichida quriladi.</p>
+            </section>
           )}
-        </section>
-      </div>
+        </div>
+      </section>
 
-      <style jsx>{`
-        .shell {
-          min-height: 100vh;
-          background: #dfe3e8;
-        }
-        .topbar {
-          height: 92px;
-          background: #f3f4f7;
-          border-bottom: 1px solid #d6dbe4;
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          padding: 0 14px;
-        }
-        .brand {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          min-width: 0;
-        }
-        .brand-logo {
-          width: 54px;
-          height: 54px;
-          border-radius: 50%;
-          background: #fff;
-          border: 1px solid #d3d8e2;
-          display: grid;
-          place-items: center;
-          flex-shrink: 0;
-        }
-        .logo-img {
-          width: 36px;
-          height: 36px;
-          object-fit: cover;
-          border-radius: 8px;
-        }
-        .brand-text {
-          max-width: 310px;
-          color: #223459;
-          font-size: 13px;
-          line-height: 1.2;
-          font-weight: 700;
-        }
-        .menu-trigger {
-          margin-left: 8px;
-          width: 42px;
-          height: 42px;
-          border-radius: 8px;
-          color: #20315f;
-        }
-        .menu-trigger svg {
-          width: 24px;
-          height: 24px;
-        }
-        .top-actions {
-          margin-left: auto;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .server-time {
-          display: none;
-          flex-direction: column;
-          align-items: flex-end;
-          color: #1f3462;
-          margin-right: 8px;
-        }
-        .server-time span {
-          font-size: 14px;
-        }
-        .server-time strong {
-          font-size: 34px;
-          line-height: 1;
-        }
-        .icon-btn,
-        .avatar-btn {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: grid;
-          place-items: center;
-          color: #21386b;
-          position: relative;
-        }
-        .icon-btn svg {
-          width: 24px;
-          height: 24px;
-        }
-        .notif-dot {
-          position: absolute;
-          top: -3px;
-          right: -2px;
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: #ed3f4f;
-          color: #fff;
-          font-size: 12px;
-          font-weight: 700;
-          display: grid;
-          place-items: center;
-        }
-        .avatar-btn {
-          border: 1px solid #d2d8e1;
-          background: #fff;
-        }
-        .avatar-img {
-          width: 34px;
-          height: 34px;
-          border-radius: 8px;
-          object-fit: cover;
-        }
-        .layout {
-          display: grid;
-          min-height: calc(100vh - 92px);
-        }
-        .sidebar {
-          display: none;
-          background: #1f346b;
-          color: #e8eefb;
-          padding: 16px 0;
-          border-right: 1px solid #162752;
-        }
-        .sidebar.open {
-          display: block;
-        }
-        .menu-list {
-          max-height: calc(100vh - 124px);
-          overflow: auto;
-          padding-right: 6px;
-        }
-        .menu-group {
-          margin: 14px 22px 8px;
-          color: #b7c5ea;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.07em;
-        }
-        .menu-item {
-          width: 100%;
-          min-height: 50px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 0 20px;
-          color: #ebeff9;
-          font-size: 36px;
-          border-top: 1px solid transparent;
-          border-bottom: 1px solid transparent;
-          transition: background-color 0.15s ease;
-        }
-        .menu-item span:last-child {
-          font-size: 34px;
-          line-height: 1;
-        }
-        .menu-item:hover {
-          background: #2c467f;
-        }
-        .menu-item.active {
-          background: #2f4b87;
-          border-top-color: #3d5b95;
-          border-bottom-color: #3d5b95;
-        }
-        .menu-icon {
-          width: 10px;
-          height: 10px;
-          border-radius: 2px;
-          background: #cad4f0;
-          flex-shrink: 0;
-        }
-        .content {
-          padding: 18px;
-          background: #dfe3e8;
-        }
-        .notice-grid {
-          display: grid;
-          gap: 16px;
-          grid-template-columns: repeat(1, minmax(0, 1fr));
-        }
-        .notice-card {
-          background: #f7f8fa;
-          border-radius: 8px;
-          border: 1px solid #dde2ea;
-          min-height: 154px;
-          padding: 14px 16px;
-          display: flex;
-          flex-direction: column;
-        }
-        .notice-card h3 {
-          color: #1f3566;
-          font-size: 36px;
-          font-weight: 700;
-          line-height: 1.2;
-        }
-        .notice-card p {
-          margin-top: 8px;
-          color: #2e3442;
-          font-size: 35px;
-          line-height: 1.35;
-        }
-        .notice-footer {
-          margin-top: auto;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          color: #b2b7c1;
-          font-size: 33px;
-        }
-        .notice-footer button {
-          min-width: 84px;
-          height: 34px;
-          border-radius: 7px;
-          background: #1e3367;
-          color: #fff;
-          font-size: 27px;
-          font-weight: 600;
-          padding: 0 14px;
-        }
-        .pager {
-          margin-top: 10px;
-          text-align: right;
-          color: #2f3646;
-          font-size: 38px;
-        }
-        .module-empty {
-          background: #f7f8fa;
-          border: 1px solid #dde2ea;
-          border-radius: 8px;
-          padding: 20px;
-        }
-        .module-empty h2 {
-          color: #1f3566;
-          font-size: 44px;
-          font-weight: 700;
-        }
-        .module-empty p {
-          margin-top: 10px;
-          color: #3a4251;
-          font-size: 34px;
-        }
-        @media (min-width: 768px) {
-          .server-time {
-            display: flex;
-          }
-          .menu-item {
-            font-size: 24px;
-          }
-          .menu-item span:last-child {
-            font-size: 18px;
-          }
-          .notice-card h3 {
-            font-size: 23px;
-          }
-          .notice-card p,
-          .notice-footer,
-          .pager,
-          .module-empty p {
-            font-size: 16px;
-          }
-          .notice-footer button {
-            font-size: 16px;
-          }
-          .module-empty h2 {
-            font-size: 30px;
-          }
-        }
-        @media (min-width: 1024px) {
-          .menu-trigger {
-            margin-left: 20px;
-          }
-          .layout {
-            grid-template-columns: 380px minmax(0, 1fr);
-          }
-          .sidebar {
-            display: block;
-          }
-          .content {
-            padding: 34px 30px;
-          }
-          .notice-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-        }
-        @media (min-width: 1280px) {
-          .notice-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-          }
-        }
-      `}</style>
+      <button
+        type="button"
+        aria-label="Telegram"
+        className="fixed bottom-6 right-6 inline-grid h-10 w-10 place-items-center rounded-full bg-blue-900 text-white shadow-lg"
+      >
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+          <path d="M21.5 4.8a1 1 0 0 0-1.06-.16L3.4 11.5a1 1 0 0 0 .08 1.88l4.6 1.54 1.69 4.95a1 1 0 0 0 1.83.19l2.35-3.2 4.38 3.22a1 1 0 0 0 1.56-.55l2.52-13.63a1 1 0 0 0-.4-1.1ZM9.6 14.24l8.63-6.85-6.67 7.97-.68 1.48-1.28-2.6Z" />
+        </svg>
+      </button>
     </main>
   );
 }
