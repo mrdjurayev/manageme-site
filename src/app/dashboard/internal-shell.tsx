@@ -91,8 +91,8 @@ export function DashboardShell() {
         />
       ) : null}
 
-      <header className="z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 shadow-sm md:px-8">
-        <div className="flex min-w-0 items-center gap-3 md:gap-4">
+      <header className="z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-3 shadow-sm md:px-7">
+        <div className="flex min-w-0 items-center gap-2 md:gap-3">
           <div className="shrink-0 p-0">
             <Image
               src="/manageme-white.png"
@@ -115,7 +115,7 @@ export function DashboardShell() {
               }
               setDesktopSidebarCollapsed((value) => !value);
             }}
-            className="ml-1 rounded-md p-2 text-[#243a6b] transition-colors hover:bg-slate-50"
+            className="ml-0 rounded-md p-2 text-[#243a6b] transition-colors hover:bg-slate-50"
             aria-label="Toggle menu"
           >
             <Menu size={22} />
