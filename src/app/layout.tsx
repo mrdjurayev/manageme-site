@@ -18,11 +18,11 @@ export const metadata: Metadata = {
   description: "Personal learning management system",
   icons: {
     icon: [
-      { url: "/icon.png?v=2", type: "image/png", sizes: "500x500" },
-      { url: "/favicon.ico?v=2", type: "image/x-icon" },
+      { url: "/icon.png?v=3", type: "image/png", sizes: "500x500" },
+      { url: "/favicon.ico?v=3", type: "image/x-icon" },
     ],
-    shortcut: "/favicon.ico?v=2",
-    apple: "/icon.png?v=2",
+    shortcut: "/favicon.ico?v=3",
+    apple: "/icon.png?v=3",
   },
 };
 
