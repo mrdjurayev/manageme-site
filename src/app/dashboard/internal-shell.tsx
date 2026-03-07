@@ -3,311 +3,309 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 
-type MenuKey = "dashboard" | "subjects" | "schedule" | "attendance" | "progress" | "about";
-
 type MenuItem = {
-  key: MenuKey;
+  key: string;
   label: string;
+  group?: string;
 };
 
 const MENU_ITEMS: MenuItem[] = [
   { key: "dashboard", label: "Dashboard" },
-  { key: "subjects", label: "Subjects" },
-  { key: "schedule", label: "Schedule" },
-  { key: "attendance", label: "Attendance" },
-  { key: "progress", label: "Progress" },
-  { key: "about", label: "About" },
+  { key: "fan-tanlov", label: "Fan tanlov", group: "TALABA" },
+  { key: "mening-fanlarim", label: "Mening fanlarim" },
+  { key: "dars-jadvali", label: "Dars jadvali" },
+  { key: "qayta-oqish", label: "Qayta o'qish" },
+  { key: "yakuniy", label: "Yakuniy" },
+  { key: "individual-reja", label: "Individual shaxsiy reja" },
+  { key: "malumot", label: "Ma'lumot" },
+  { key: "sorovnoma", label: "So'rovnoma" },
+  { key: "talaba-xizmatlari", label: "Talaba xizmatlari" },
+  { key: "olimpiadalar", label: "Olimpiadalar" },
+  { key: "diplom-ishi", label: "Diplom ishi" },
 ];
 
-function formatNow(value: Date): string {
-  return value.toLocaleString("en-GB", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+function formatServerTime(value: Date): string {
+  const date = value.toLocaleDateString("en-GB").replaceAll("/", ".");
+  const time = value.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  return `${date} | ${time}`;
 }
 
 export function DashboardShell() {
-  const [activeMenu, setActiveMenu] = useState<MenuKey>("dashboard");
+  const [activeKey, setActiveKey] = useState("dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [now, setNow] = useState(() => new Date());
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000 * 30);
+    const timer = window.setInterval(() => setNow(new Date()), 30_000);
     return () => window.clearInterval(timer);
   }, []);
 
-  const title = useMemo(
-    () => MENU_ITEMS.find((item) => item.key === activeMenu)?.label ?? "Dashboard",
-    [activeMenu],
-  );
+  const activeLabel = useMemo(() => {
+    return MENU_ITEMS.find((item) => item.key === activeKey)?.label ?? "Dashboard";
+  }, [activeKey]);
 
   return (
-    <main className="shell-page">
-      <div className="shell-wrap">
-        <header className="shell-topbar">
-          <div className="shell-logo-pill">
+    <main className="shell">
+      <div className="topbar">
+        <div className="brand-block">
+          <div className="brand-logo-wrap">
             <Image
               src="/mm-monogram-logo-hexagon-style-vector-27349645.avif"
               alt="Manage Me logo"
-              width={44}
-              height={44}
-              className="shell-logo-image"
+              width={42}
+              height={42}
+              className="brand-logo"
               priority
             />
           </div>
+          <p className="brand-title">MANAGE ME LMS</p>
+        </div>
 
-          <button
-            type="button"
-            onClick={() => setIsMenuOpen((value) => !value)}
-            className="menu-toggle lg:hidden"
-            aria-label="Toggle menu"
-            aria-expanded={isMenuOpen}
-          >
-            <svg viewBox="0 0 24 24" className="icon-mid" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <rect x="3.2" y="4.2" width="7.5" height="15.6" rx="2" />
-              <rect x="13.3" y="4.2" width="7.5" height="15.6" rx="2" />
+        <button
+          type="button"
+          className="menu-btn"
+          onClick={() => setIsSidebarOpen((value) => !value)}
+          aria-label="Toggle menu"
+          aria-expanded={isSidebarOpen}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          </svg>
+        </button>
+
+        <div className="top-right">
+          <div className="server-time">
+            <span className="server-time-label">Server vaqti</span>
+            <span className="server-time-value">{formatServerTime(now)}</span>
+          </div>
+          <button type="button" className="icon-btn" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M7 9a5 5 0 0 1 10 0v4l1.2 2.2a1 1 0 0 1-.88 1.48H6.68a1 1 0 0 1-.88-1.48L7 13V9Z" />
+              <path d="M10 18a2 2 0 0 0 4 0" />
             </svg>
           </button>
-
-          <div className="shell-right">
-            <p className="date-label">{formatNow(now)}</p>
-            <button
-              type="button"
-              className="icon-circle"
-              aria-label="Notifications"
-            >
-              <svg viewBox="0 0 24 24" className="icon-small" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path d="M7 9a5 5 0 0 1 10 0v4l1.3 2.4A1 1 0 0 1 17.4 17H6.6a1 1 0 0 1-.9-1.6L7 13V9Z" />
-                <path d="M10 18a2 2 0 0 0 4 0" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="profile-circle"
-              aria-label="Profile"
-            >
-              <svg viewBox="0 0 24 24" className="icon-large" fill="currentColor">
-                <circle cx="12" cy="8" r="4.2" />
-                <path d="M4.6 19.6a7.4 7.4 0 0 1 14.8 0" />
-              </svg>
-            </button>
-          </div>
-        </header>
-
-        <div className="shell-grid">
-          <aside
-            className={`shell-sidebar ${isMenuOpen ? "menu-open" : "menu-closed"}`}
-          >
-            <nav className="sidebar-nav">
-              {MENU_ITEMS.map((item) => {
-                const isActive = item.key === activeMenu;
-                return (
-                  <button
-                    key={item.key}
-                    type="button"
-                    onClick={() => {
-                      setActiveMenu(item.key);
-                      setIsMenuOpen(false);
-                    }}
-                    className={`menu-item ${isActive ? "menu-item-active" : ""}`}
-                  >
-                    <span className="menu-text">{item.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </aside>
-
-          <section className="shell-content">
-            <h2 className="content-title">{title}</h2>
-            <p className="content-note">
-              Empty workspace. We will build this module from zero in the next step.
-            </p>
-          </section>
+          <button type="button" className="avatar-btn" aria-label="Profile">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="8" r="4.2" />
+              <path d="M4.8 19.4a7.2 7.2 0 0 1 14.4 0" />
+            </svg>
+          </button>
         </div>
       </div>
+
+      <div className="layout">
+        <aside className={`sidebar ${isSidebarOpen ? "sidebar-open" : ""}`}>
+          <nav>
+            {MENU_ITEMS.map((item, index) => {
+              const prevItem = MENU_ITEMS[index - 1];
+              const shouldRenderGroup = Boolean(item.group && item.group !== prevItem?.group);
+              const isActive = item.key === activeKey;
+
+              return (
+                <div key={item.key}>
+                  {shouldRenderGroup ? <p className="menu-group">{item.group}</p> : null}
+                  <button
+                    type="button"
+                    className={`menu-item ${isActive ? "menu-item-active" : ""}`}
+                    onClick={() => {
+                      setActiveKey(item.key);
+                      setIsSidebarOpen(false);
+                    }}
+                  >
+                    <span className="menu-dot" />
+                    <span>{item.label}</span>
+                  </button>
+                </div>
+              );
+            })}
+          </nav>
+        </aside>
+
+        <section className="content">
+          <h1>{activeLabel}</h1>
+          <p>Bo&apos;sh ishchi maydon. Shu bo&apos;limni keyingi bosqichda to&apos;liq quramiz.</p>
+        </section>
+      </div>
+
       <style jsx>{`
-        .shell-page {
+        .shell {
           min-height: 100vh;
-          background: #f3f4f6;
-          padding: 16px;
+          background: #eef0f5;
+          padding: 12px;
         }
-        .shell-wrap {
-          max-width: 1500px;
-          margin: 0 auto;
-        }
-        .shell-topbar {
+        .topbar {
+          min-height: 72px;
+          border: 1px solid #d9dee7;
+          background: #fff;
           display: flex;
           align-items: center;
           gap: 12px;
-          height: 92px;
-          border: 1px solid #cfd4dd;
-          border-radius: 30px;
-          background: #f7f8fa;
-          padding: 0 16px;
-          box-shadow: 0 3px 12px rgba(31, 31, 31, 0.07);
+          padding: 10px 14px;
         }
-        .shell-logo-pill {
-          width: 130px;
-          height: 66px;
-          flex-shrink: 0;
+        .brand-block {
           display: flex;
           align-items: center;
-          justify-content: center;
-          border: 1px solid #d1d5db;
-          border-radius: 999px;
-          background: #f1f3f6;
-          box-shadow: 0 2px 8px rgba(31, 31, 31, 0.08);
+          gap: 12px;
         }
-        .shell-logo-image {
-          width: 44px;
-          height: 44px;
-          border-radius: 8px;
-          object-fit: cover;
-        }
-        .menu-toggle {
-          width: 48px;
-          height: 48px;
+        .brand-logo-wrap {
+          width: 46px;
+          height: 46px;
+          border-radius: 10px;
+          background: #1f1b23;
           display: grid;
           place-items: center;
-          border: 1px solid #d1d5db;
-          border-radius: 12px;
-          background: #eff2f6;
-          color: #7b8494;
         }
-        .shell-right {
+        .brand-logo {
+          width: 28px;
+          height: 28px;
+          object-fit: cover;
+        }
+        .brand-title {
+          font-size: 14px;
+          font-weight: 600;
+          color: #384559;
+          letter-spacing: 0.04em;
+        }
+        .menu-btn {
+          width: 42px;
+          height: 42px;
+          border: 1px solid #d7dce5;
+          border-radius: 8px;
+          display: grid;
+          place-items: center;
+          color: #445066;
+        }
+        .menu-btn svg {
+          width: 20px;
+          height: 20px;
+        }
+        .top-right {
           margin-left: auto;
           display: flex;
           align-items: center;
-          gap: 12px;
-          color: #7f8796;
+          gap: 10px;
         }
-        .date-label {
+        .server-time {
           display: none;
-          font-size: 28px;
+          flex-direction: column;
+          align-items: flex-end;
+          color: #3f4c61;
+        }
+        .server-time-label {
+          font-size: 12px;
+          opacity: 0.8;
+        }
+        .server-time-value {
+          font-size: 20px;
+          line-height: 1;
           font-weight: 500;
         }
-        .icon-circle,
-        .profile-circle {
+        .icon-btn,
+        .avatar-btn {
+          width: 40px;
+          height: 40px;
+          border: 1px solid #d7dce5;
+          border-radius: 50%;
+          color: #3f4c61;
           display: grid;
           place-items: center;
-          border-radius: 999px;
-          background: #eff2f6;
         }
-        .icon-circle {
-          width: 44px;
-          height: 44px;
-          border: 1px solid #d1d5db;
-          color: #7f8796;
+        .icon-btn svg,
+        .avatar-btn svg {
+          width: 21px;
+          height: 21px;
         }
-        .profile-circle {
-          width: 56px;
-          height: 56px;
-          border: 1px solid #cfd4dd;
-          color: #7d8592;
-        }
-        .icon-small {
-          width: 24px;
-          height: 24px;
-        }
-        .icon-mid {
-          width: 28px;
-          height: 28px;
-        }
-        .icon-large {
-          width: 32px;
-          height: 32px;
-        }
-        .shell-grid {
-          margin-top: 20px;
+        .layout {
+          margin-top: 10px;
           display: grid;
-          gap: 20px;
+          gap: 10px;
         }
-        .shell-sidebar {
-          border: 1px solid #cfd4dd;
-          border-radius: 34px;
-          background: #f7f8fa;
-          padding: 20px;
-          box-shadow: 0 3px 12px rgba(31, 31, 31, 0.07);
-        }
-        .menu-closed {
+        .sidebar {
           display: none;
+          border: 1px solid #d0d7e2;
+          background: #1f3166;
+          color: #f1f4fa;
+          padding: 12px 10px;
         }
-        .menu-open {
+        .sidebar-open {
           display: block;
         }
-        .sidebar-nav {
-          display: grid;
-          gap: 16px;
+        .menu-group {
+          margin: 14px 8px 8px;
+          font-size: 11px;
+          letter-spacing: 0.12em;
+          font-weight: 700;
+          color: #9fb0da;
         }
         .menu-item {
           width: 100%;
-          height: 86px;
-          border: 1px solid #d3d8e0;
-          border-radius: 24px;
-          background: #f4f6f9;
-          color: #768093;
-          box-shadow: 0 3px 8px rgba(31, 31, 31, 0.06);
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 0 10px;
+          color: #edf1fa;
+          border-radius: 8px;
+          transition: background-color 0.15s ease;
+        }
+        .menu-item:hover {
+          background: #2d448a;
         }
         .menu-item-active {
-          border-color: #bcc4d0;
-          background: #edf1f6;
-          color: #5f6878;
+          background: #2f4a94;
         }
-        .menu-text {
-          font-size: clamp(1.8rem, 2.6vw, 3.05rem);
-          line-height: 1;
+        .menu-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #c7d3f4;
+          flex-shrink: 0;
         }
-        .shell-content {
-          min-height: 600px;
-          border: 1px solid #d6dbe4;
-          border-radius: 34px;
-          background: #f8f9fb;
-          padding: 28px;
-          box-shadow: 0 3px 12px rgba(31, 31, 31, 0.04);
+        .content {
+          min-height: 70vh;
+          border: 1px solid #d8dde7;
+          background: #fff;
+          padding: 16px;
         }
-        .content-title {
-          font-size: clamp(2rem, 3vw, 3rem);
-          font-weight: 500;
-          color: #6f7888;
+        .content h1 {
+          font-size: 32px;
+          color: #1f2c44;
+          font-weight: 600;
         }
-        .content-note {
-          margin-top: 12px;
-          font-size: 22px;
-          color: #8a93a2;
+        .content p {
+          margin-top: 10px;
+          color: #4f5b71;
+          font-size: 18px;
         }
         @media (min-width: 768px) {
-          .shell-page {
-            padding: 24px;
+          .topbar {
+            min-height: 84px;
+            padding: 12px 18px;
           }
-          .shell-topbar {
-            height: 98px;
-            gap: 20px;
-            padding: 0 32px;
+          .brand-title {
+            font-size: 15px;
           }
-          .shell-logo-pill {
-            width: 160px;
-            height: 70px;
-          }
-          .shell-right {
-            gap: 28px;
-          }
-          .date-label {
-            display: block;
+          .server-time {
+            display: flex;
           }
         }
         @media (min-width: 1024px) {
-          .menu-toggle {
+          .shell {
+            padding: 14px;
+          }
+          .menu-btn {
             display: none;
           }
-          .shell-grid {
-            grid-template-columns: 340px minmax(0, 1fr);
+          .layout {
+            grid-template-columns: 280px minmax(0, 1fr);
           }
-          .shell-sidebar {
-            display: block !important;
+          .sidebar {
+            display: block;
+            min-height: calc(100vh - 120px);
+          }
+          .content {
+            min-height: calc(100vh - 120px);
+            padding: 22px 26px;
           }
         }
       `}</style>
