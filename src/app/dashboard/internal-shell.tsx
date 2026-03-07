@@ -104,7 +104,7 @@ export function DashboardShell() {
             />
           </div>
           <h1 className="line-clamp-2 text-[10px] font-bold uppercase leading-[1.2] tracking-tight text-[#243a6b] sm:text-[11px] md:text-[13px]">
-            Muhammad al-Xorazmiy nomidagi Toshkent Axborot Texnologiyalari Universiteti
+            MANAGE ME
           </h1>
           <button
             type="button"
@@ -240,6 +240,7 @@ export function DashboardShell() {
                     <Icon size={18} className={activeMenu === item.name ? "opacity-100" : "opacity-60"} />
                     <span className="text-[13px] font-medium tracking-wide">{item.name}</span>
                   </button>
+                  {item.name === "Dashboard" ? <div className="mt-1 h-px w-full bg-[#33497d]" /> : null}
                 </div>
               );
             })}
