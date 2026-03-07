@@ -97,9 +97,9 @@ export function DashboardShell() {
             <Image
               src="/manageme-white.png"
               alt="Logo"
-              width={44}
-              height={44}
-              className="h-11 w-11 object-contain"
+              width={52}
+              height={52}
+              className="h-[52px] w-[52px] object-contain"
               priority
             />
           </div>
