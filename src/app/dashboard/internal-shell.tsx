@@ -91,15 +91,15 @@ export function DashboardShell() {
         />
       ) : null}
 
-      <header className="z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-3 shadow-sm md:px-7">
+      <header className="z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-2 shadow-sm md:px-6">
         <div className="flex min-w-0 items-center gap-2 md:gap-3">
-          <div className="shrink-0 p-0">
+          <div className="-ml-0.5 shrink-0 p-0 md:-ml-1">
             <Image
               src="/manageme-white.png"
               alt="Logo"
-              width={52}
-              height={52}
-              className="h-[52px] w-[52px] object-contain"
+              width={58}
+              height={58}
+              className="h-[58px] w-[58px] object-contain"
               priority
             />
           </div>
