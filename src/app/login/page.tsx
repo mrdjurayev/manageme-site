@@ -23,19 +23,19 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#f3f4f6] px-4 py-8">
-      <section className="min-h-[536px] w-[94vw] rounded-2xl border border-[#e5e7eb] bg-white px-6 py-10 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] sm:w-[90vw] sm:px-8 sm:py-12 md:min-h-[620px] md:w-[74vw] md:max-w-[680px] md:px-10 md:py-16 lg:min-h-0 lg:w-1/3 lg:min-w-[430px] lg:max-w-[470px]">
-        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-[#111827]">
+      <section className="min-h-[536px] w-[94vw] rounded-2xl border border-[#e5e7eb] bg-white px-6 pb-10 pt-8 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.03)] sm:w-[90vw] sm:px-8 sm:pb-12 sm:pt-10 md:min-h-[620px] md:w-[74vw] md:max-w-[680px] md:px-10 md:pb-16 md:pt-12 lg:min-h-0 lg:w-1/3 lg:min-w-[430px] lg:max-w-[470px]">
+        <div className="mx-auto mb-6 flex h-[92px] w-[92px] items-center justify-center overflow-hidden bg-[#111827]">
           <Image
-            src="/mm-monogram-logo-hexagon-style-vector-27349645.avif"
+            src="/manageme-white.png"
             alt="Manage Me logo"
-            width={56}
-            height={56}
-            className="h-full w-full object-cover"
+            width={92}
+            height={92}
+            className="h-full w-full object-contain"
             priority
           />
         </div>
 
-        <h1 className="text-center text-[clamp(1.9rem,3vw,2.65rem)] font-semibold text-[rgb(36,31,33)]">
+        <h1 className="whitespace-nowrap text-center text-[clamp(1.32rem,3.1vw,1.95rem)] font-semibold text-[rgb(36,31,33)]">
           Manage Me <span className="mx-1 font-light text-[#d1d5db]">|</span> Log In
         </h1>
 
