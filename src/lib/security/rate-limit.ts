@@ -8,6 +8,7 @@ type Bucket = {
 };
 
 const buckets = new Map<string, Bucket>();
+const blockFlags = new Map<string, number>();
 let redisClient: Redis | null | undefined;
 
 function getRedisClient(): Redis | null {
@@ -35,6 +36,12 @@ function cleanupExpired(now: number) {
   for (const [key, value] of buckets.entries()) {
     if (value.resetAt <= now) {
       buckets.delete(key);
+    }
+  }
+
+  for (const [key, resetAt] of blockFlags.entries()) {
+    if (resetAt <= now) {
+      blockFlags.delete(key);
     }
   }
 }
@@ -87,6 +94,25 @@ async function isRateLimitedInRedis(
   return count > limit;
 }
 
+async function isBlockedInRedis(key: string): Promise<boolean> {
+  const redis = getRedisClient();
+  if (!redis) {
+    return false;
+  }
+
+  const exists = await redis.exists(`block:${key}`);
+  return exists > 0;
+}
+
+async function blockKeyInRedis(key: string, ttlMs: number): Promise<void> {
+  const redis = getRedisClient();
+  if (!redis) {
+    return;
+  }
+
+  await redis.set(`block:${key}`, "1", { px: ttlMs });
+}
+
 export async function isRateLimited(
   key: string,
   limit: number,
@@ -101,5 +127,43 @@ export async function isRateLimited(
     return await isRateLimitedInRedis(key, limit, windowMs);
   } catch {
     return isRateLimitedInMemory(key, limit, windowMs);
+  }
+}
+
+export async function isTemporarilyBlocked(key: string): Promise<boolean> {
+  const now = Date.now();
+  cleanupExpired(now);
+
+  const localExpiry = blockFlags.get(key);
+  if (localExpiry && localExpiry > now) {
+    return true;
+  }
+
+  const redis = getRedisClient();
+  if (!redis) {
+    return false;
+  }
+
+  try {
+    return await isBlockedInRedis(key);
+  } catch {
+    return false;
+  }
+}
+
+export async function blockKey(key: string, ttlMs: number): Promise<void> {
+  const now = Date.now();
+  cleanupExpired(now);
+  blockFlags.set(key, now + ttlMs);
+
+  const redis = getRedisClient();
+  if (!redis) {
+    return;
+  }
+
+  try {
+    await blockKeyInRedis(key, ttlMs);
+  } catch {
+    // Fallback stays in-memory.
   }
 }

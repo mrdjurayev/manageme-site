@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getServerEnv } from "@/lib/env/server";
-import { isRateLimited } from "@/lib/security/rate-limit";
+import { blockKey, isRateLimited, isTemporarilyBlocked } from "@/lib/security/rate-limit";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { createClient } from "@/lib/supabase/server";
 
@@ -156,8 +156,20 @@ export async function signInAction(formData: FormData) {
   const redirectTo = getSafeRedirectPath(getValue(formData, "redirectTo"));
   const ip = await getClientIp();
   const loginErrorMessage = "Login failed. Incorrect login or password.";
+  const ipAttemptKey = `signin:attempt:${ip}`;
+  const ipFailureKey = `signin:failure:${ip}`;
+  const ipBlockKey = `signin:blocked:${ip}`;
 
   if (!login || login.length > 64 || !password || password.length > 256) {
+    redirect(toQueryMessage("/login", "error", loginErrorMessage));
+  }
+
+  if (await isTemporarilyBlocked(ipBlockKey)) {
+    redirect(toQueryMessage("/login", "error", loginErrorMessage));
+  }
+
+  if (await isRateLimited(ipAttemptKey, 15, 10 * 60 * 1000)) {
+    await blockKey(ipBlockKey, 15 * 60 * 1000);
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
@@ -168,10 +180,9 @@ export async function signInAction(formData: FormData) {
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
-  const rateLimitKey = `signin:${ip}`;
-
   if (!secureEqual(login, lockedAuth.login) || !secureEqual(password, lockedAuth.password)) {
-    if (await isRateLimited(rateLimitKey, 8, 10 * 60 * 1000)) {
+    if (await isRateLimited(ipFailureKey, 5, 10 * 60 * 1000)) {
+      await blockKey(ipBlockKey, 15 * 60 * 1000);
       redirect(toQueryMessage("/login", "error", loginErrorMessage));
     }
     redirect(toQueryMessage("/login", "error", loginErrorMessage));

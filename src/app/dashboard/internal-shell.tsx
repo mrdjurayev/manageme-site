@@ -37,6 +37,13 @@ const menuItems: MenuItem[] = [
   { name: "Ma'lumot", icon: Info, section: null },
 ];
 
+const SOFT_DIVIDER_COLOR = "rgba(203,213,225,0.45)";
+const MOBILE_BREAKPOINT = 1024;
+
+function cn(...classes: Array<string | false | null | undefined>): string {
+  return classes.filter(Boolean).join(" ");
+}
+
 function formatServerTime(date: Date): string {
   const day = date.toLocaleDateString("en-GB").replaceAll("/", ".");
   const time = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
@@ -56,6 +63,37 @@ export function DashboardShell() {
     return () => window.clearInterval(timer);
   }, []);
 
+  const toggleSidebar = () => {
+    if (window.innerWidth < MOBILE_BREAKPOINT) {
+      setMobileSidebarOpen((value) => !value);
+      return;
+    }
+
+    setDesktopSidebarCollapsed((value) => !value);
+  };
+
+  const toggleNotifications = () => {
+    setIsNotifOpen((value) => !value);
+    setIsProfileOpen(false);
+  };
+
+  const toggleProfile = () => {
+    setIsProfileOpen((value) => !value);
+    setIsNotifOpen(false);
+  };
+
+  const selectMenu = (name: string) => {
+    setActiveMenu(name);
+    setMobileSidebarOpen(false);
+  };
+
+  const sidebarClassName = cn(
+    "custom-scrollbar fixed bottom-0 left-0 top-20 z-40 w-[260px] overflow-x-hidden overflow-y-auto bg-white text-[rgb(36,31,33)] transition-[transform,width] duration-200 ease-out",
+    mobileSidebarOpen ? "translate-x-0" : "-translate-x-full",
+    "lg:relative lg:bottom-auto lg:left-0 lg:top-auto lg:translate-x-0",
+    desktopSidebarCollapsed ? "lg:w-0 lg:min-w-0 lg:overflow-hidden" : "lg:w-[260px]",
+  );
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-[#f4f7fe] font-sans text-slate-700">
       {mobileSidebarOpen ? (
@@ -67,7 +105,10 @@ export function DashboardShell() {
         />
       ) : null}
 
-      <header className="z-50 flex h-20 items-center justify-between bg-white px-2 [border-bottom:0.5px_solid_rgba(203,213,225,0.45)] md:px-6">
+      <header
+        className="z-50 flex h-20 items-center justify-between bg-white px-2 md:px-6"
+        style={{ borderBottom: `0.5px solid ${SOFT_DIVIDER_COLOR}` }}
+      >
         <div className="flex h-full min-w-0 items-center gap-2 md:gap-3">
           <div className="-ml-0.5 shrink-0 p-0 md:-ml-1">
             <Image
@@ -84,13 +125,7 @@ export function DashboardShell() {
           </h1>
           <button
             type="button"
-            onClick={() => {
-              if (window.innerWidth < 1024) {
-                setMobileSidebarOpen((value) => !value);
-                return;
-              }
-              setDesktopSidebarCollapsed((value) => !value);
-            }}
+            onClick={toggleSidebar}
             className="ml-0 rounded-md p-2 text-[rgb(36,31,33)] transition-colors hover:bg-slate-50"
             aria-label="Toggle menu"
           >
@@ -107,10 +142,7 @@ export function DashboardShell() {
           <div className="relative">
             <button
               type="button"
-              onClick={() => {
-                setIsNotifOpen((value) => !value);
-                setIsProfileOpen(false);
-              }}
+              onClick={toggleNotifications}
               className="relative p-1.5 text-[rgb(36,31,33)] transition-colors"
               aria-label="Notifications"
             >
@@ -146,10 +178,7 @@ export function DashboardShell() {
           <div className="relative">
             <button
               type="button"
-              onClick={() => {
-                setIsProfileOpen((value) => !value);
-                setIsNotifOpen(false);
-              }}
+              onClick={toggleProfile}
               className="flex h-10 w-10 items-center justify-center focus:outline-none"
               aria-label="Profile menu"
             >
@@ -177,17 +206,13 @@ export function DashboardShell() {
       </header>
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <aside
-          className={`custom-scrollbar fixed bottom-0 left-0 top-20 z-40 w-[260px] overflow-x-hidden overflow-y-auto bg-[rgb(255,255,255)] text-[rgb(36,31,33)] transition-[transform,width] duration-200 ease-out
-            ${mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-            lg:relative lg:bottom-auto lg:left-0 lg:top-auto lg:translate-x-0
-            ${desktopSidebarCollapsed ? "lg:w-0 lg:min-w-0 lg:overflow-hidden" : "lg:w-[260px]"}
-            [border-right:0.5px_solid_rgba(203,213,225,0.45)]`}
-        >
+        <aside className={sidebarClassName} style={{ borderRight: `0.5px solid ${SOFT_DIVIDER_COLOR}` }}>
           <div className="w-[260px]">
             <nav className="py-4 text-sm">
               {menuItems.map((item) => {
                 const Icon = item.icon;
+                const isActive = activeMenu === item.name;
+
                 return (
                   <div key={item.name}>
                     {item.section ? (
@@ -197,20 +222,18 @@ export function DashboardShell() {
                     ) : null}
                     <button
                       type="button"
-                      onClick={() => {
-                        setActiveMenu(item.name);
-                        setMobileSidebarOpen(false);
-                      }}
-                      className={`relative flex w-full cursor-pointer items-center gap-3 px-6 py-3 text-left transition-all ${
-                        activeMenu === item.name
-                          ? "border-l-[3px] border-[rgb(36,31,33)] pl-[21px]"
-                          : "border-l-[3px] border-transparent"
-                      }`}
+                      onClick={() => selectMenu(item.name)}
+                      className={cn(
+                        "relative flex w-full cursor-pointer items-center gap-3 px-6 py-3 text-left transition-all",
+                        isActive ? "border-l-[3px] border-[rgb(36,31,33)] pl-[21px]" : "border-l-[3px] border-transparent",
+                      )}
                     >
                       <Icon size={20} className="text-[rgb(36,31,33)]" />
                       <span className="text-[15px] font-medium tracking-wide text-[rgb(36,31,33)]">{item.name}</span>
                     </button>
-                    {item.name === "Dashboard" ? <div className="mt-4 h-[0.5px] w-full bg-[rgba(203,213,225,0.45)]" /> : null}
+                    {item.name === "Dashboard" ? (
+                      <div className="mt-4 h-[0.5px] w-full" style={{ backgroundColor: SOFT_DIVIDER_COLOR }} />
+                    ) : null}
                   </div>
                 );
               })}
