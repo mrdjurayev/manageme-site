@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bell,
   BookOpen,
   Calendar,
+  ChartNoAxesCombined,
   ClipboardList,
   FileText,
   HelpCircle,
@@ -28,13 +29,13 @@ type MenuItem = {
 
 const menuItems: MenuItem[] = [
   { name: "Dashboard", icon: LayoutDashboard, section: null },
-  { name: "Mening fanlarim", icon: BookOpen, section: "TALABA" },
-  { name: "Dars jadvali", icon: Calendar, section: null },
-  { name: "Vazifalar", icon: ClipboardList, section: null },
-  { name: "Qayta o'qish", icon: RotateCcw, section: null },
-  { name: "Yakuniy", icon: HelpCircle, section: null },
-  { name: "Individual shaxsiy reja", icon: FileText, section: null },
-  { name: "Ma'lumot", icon: Info, section: null },
+  { name: "My Subjects", icon: BookOpen, section: "STUDENT" },
+  { name: "Lesson Schedule", icon: Calendar, section: null },
+  { name: "Assignments", icon: ClipboardList, section: null },
+  { name: "Retake a Subject", icon: RotateCcw, section: null },
+  { name: "Final Exam", icon: HelpCircle, section: null },
+  { name: "Individual Plan", icon: ChartNoAxesCombined, section: null },
+  { name: "About", icon: Info, section: null },
 ];
 
 const SOFT_DIVIDER_COLOR = "rgba(203,213,225,0.45)";
@@ -57,10 +58,38 @@ export function DashboardShell() {
   const [currentTime, setCurrentTime] = useState(() => formatServerTime(new Date()));
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
+  const notifRef = useRef<HTMLDivElement | null>(null);
+  const profileRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const timer = window.setInterval(() => setCurrentTime(formatServerTime(new Date())), 30_000);
     return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const handleDocumentPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target) {
+        return;
+      }
+
+      const clickedInsideNotif = notifRef.current?.contains(target) ?? false;
+      const clickedInsideProfile = profileRef.current?.contains(target) ?? false;
+
+      if (!clickedInsideNotif) {
+        setIsNotifOpen(false);
+      }
+
+      if (!clickedInsideProfile) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handleDocumentPointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleDocumentPointerDown);
+    };
   }, []);
 
   const toggleSidebar = () => {
@@ -120,13 +149,20 @@ export function DashboardShell() {
               priority
             />
           </div>
-          <h1 className="line-clamp-2 text-[12px] font-bold uppercase leading-[1.2] tracking-tight text-[rgb(36,31,33)] sm:text-[13px] md:text-[15px]">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveMenu("Dashboard");
+              setMobileSidebarOpen(false);
+            }}
+            className="line-clamp-2 cursor-pointer text-[12px] font-bold uppercase leading-[1.2] tracking-tight text-[rgb(36,31,33)] sm:text-[13px] md:text-[15px]"
+          >
             MANAGE ME
-          </h1>
+          </button>
           <button
             type="button"
             onClick={toggleSidebar}
-            className="ml-0 rounded-md p-2 text-[rgb(36,31,33)] transition-colors hover:bg-slate-50"
+            className="ml-0 cursor-pointer rounded-md p-2 text-[rgb(36,31,33)] transition-colors hover:bg-slate-50"
             aria-label="Toggle menu"
           >
             <Menu size={22} />
@@ -135,15 +171,15 @@ export function DashboardShell() {
 
         <div className="flex h-full items-center gap-4 md:gap-6">
           <div className="hidden text-right sm:block">
-            <p className="mb-0.5 text-[10px] font-bold uppercase tracking-wider text-[#6b7280]">Server vaqti</p>
+            <p className="mb-0.5 text-[10px] font-bold uppercase tracking-wider text-[#6b7280]">SERVER TIME</p>
             <p className="text-[14px] font-bold text-[rgb(36,31,33)]">{currentTime}</p>
           </div>
 
-          <div className="relative">
+          <div ref={notifRef} className="relative">
             <button
               type="button"
               onClick={toggleNotifications}
-              className="relative p-1.5 text-[rgb(36,31,33)] transition-colors"
+              className="relative cursor-pointer p-1.5 text-[rgb(36,31,33)] transition-colors"
               aria-label="Notifications"
             >
               <Bell size={23} strokeWidth={1.7} />
@@ -154,32 +190,34 @@ export function DashboardShell() {
 
             {isNotifOpen ? (
               <div className="absolute right-[-10px] mt-4 w-[320px] overflow-hidden rounded-md border border-slate-100 bg-white shadow-2xl">
-                <div className="bg-[#242e4c] p-3 text-[13px] font-bold text-white">Xabarnomalar</div>
-                <div className="flex cursor-pointer gap-4 border-b border-slate-50 p-4 hover:bg-slate-50">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[#f0f2f5] text-slate-500">
+                <div className="bg-[rgb(36,31,33)] p-3 text-[13px] font-bold text-white">Notifications</div>
+                <div className="flex cursor-pointer gap-4 border-b border-slate-50 p-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[rgb(250,250,250)] text-[rgb(36,31,33)]">
                     <FileText size={20} />
                   </div>
                   <div className="flex flex-col">
-                    <p className="text-[13px] font-bold leading-tight text-blue-500">amaliy ish (Tahdid razvedkasi)</p>
-                    <p className="mt-1 text-[12px] font-medium text-slate-600">Muddatgacha 4 kun qoldi</p>
-                    <p className="mt-1 text-[11px] font-semibold uppercase tracking-tighter text-slate-300">
-                      11-03-26 23:59:59
-                    </p>
+                    <p className="text-[13px] font-bold leading-tight text-[rgb(36,31,33)]">main deadline title</p>
+                    <p className="mt-1 text-[12px] font-medium text-[#6b7280]">title of day left</p>
+                    <p className="mt-1 text-[10px] font-normal text-[#6b7280]">last period of deadline</p>
                   </div>
                 </div>
               </div>
             ) : null}
           </div>
 
-          <button type="button" className="p-1.5 text-[rgb(36,31,33)] transition-colors" aria-label="Video">
+          <button
+            type="button"
+            className="cursor-pointer p-1.5 text-[rgb(36,31,33)] transition-colors"
+            aria-label="Video"
+          >
             <Video size={23} strokeWidth={1.7} />
           </button>
 
-          <div className="relative">
+          <div ref={profileRef} className="relative">
             <button
               type="button"
               onClick={toggleProfile}
-              className="flex h-10 w-10 items-center justify-center focus:outline-none"
+              className="flex h-10 w-10 cursor-pointer items-center justify-center focus:outline-none"
               aria-label="Profile menu"
             >
               <UserCircle2 size={30} strokeWidth={1.6} className="text-[rgb(36,31,33)]" />
@@ -187,16 +225,16 @@ export function DashboardShell() {
 
             {isProfileOpen ? (
               <div className="absolute right-0 mt-4 w-52 overflow-hidden rounded-md border border-slate-100 bg-white shadow-2xl">
-                <div className="bg-[#242e4c] p-3.5 text-white">
-                  <p className="text-[13px] font-bold uppercase leading-tight tracking-wide">Oktyabrov</p>
-                  <p className="text-[12px] font-medium opacity-80">Shaxobiddin</p>
+                <div className="bg-[rgb(36,31,33)] p-3.5 text-white">
+                  <p className="text-[13px] font-bold uppercase leading-tight tracking-wide">Abdullox</p>
+                  <p className="text-[12px] font-medium text-[#6b7280]">Jurayev</p>
                 </div>
                 <div className="py-1">
-                  <button className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-[13px] text-slate-600 transition-colors hover:bg-slate-50">
-                    <Settings size={15} className="text-slate-400" /> Profil sozlamalari
+                  <button className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left text-[13px] text-[rgb(36,31,33)]">
+                    <Settings size={15} className="text-[rgb(36,31,33)]" /> Profile Settings
                   </button>
-                  <button className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-[13px] text-slate-600 transition-colors hover:bg-slate-50">
-                    <LogOut size={15} className="text-slate-400" /> Chiqish
+                  <button className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left text-[13px] text-[rgb(36,31,33)]">
+                    <LogOut size={15} className="text-[rgb(36,31,33)]" /> Logout
                   </button>
                 </div>
               </div>
@@ -208,7 +246,7 @@ export function DashboardShell() {
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <aside className={sidebarClassName} style={{ borderRight: `0.5px solid ${SOFT_DIVIDER_COLOR}` }}>
           <div className="w-[260px]">
-            <nav className="py-4 text-sm">
+            <nav className="pb-4 pt-3 text-sm">
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeMenu === item.name;
@@ -232,7 +270,7 @@ export function DashboardShell() {
                       <span className="text-[15px] font-medium tracking-wide text-[rgb(36,31,33)]">{item.name}</span>
                     </button>
                     {item.name === "Dashboard" ? (
-                      <div className="mt-4 h-[0.5px] w-full" style={{ backgroundColor: SOFT_DIVIDER_COLOR }} />
+                      <div className="mt-3 h-[0.5px] w-full" style={{ backgroundColor: SOFT_DIVIDER_COLOR }} />
                     ) : null}
                   </div>
                 );
