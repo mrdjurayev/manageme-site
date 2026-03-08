@@ -124,7 +124,7 @@ export function DashboardShell() {
   );
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#f4f7fe] font-sans text-slate-700">
+    <div className="app-shell-scale flex h-screen flex-col overflow-hidden bg-[#f4f7fe] font-sans text-slate-700">
       {mobileSidebarOpen ? (
         <button
           type="button"
