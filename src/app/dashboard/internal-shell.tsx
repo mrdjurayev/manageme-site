@@ -99,11 +99,9 @@ const HAIRLINE_SIZE = "0.5px";
 const MOBILE_BREAKPOINT = 1024;
 const PRIMARY_TEXT = "rgb(36, 31, 33)";
 const PRIMARY_BG = "rgb(255, 255, 255)";
-const FILTER_BUTTON_CLASS =
-  "min-w-0 cursor-pointer rounded-lg px-2 py-2 text-[10px] font-medium leading-tight md:h-9 md:shrink-0 md:px-4 md:py-0 md:text-sm";
-const FILTER_BAR_CLASS = "-mx-4 px-4 py-3 md:-mx-8 md:h-[70px] md:px-0 md:py-0";
-const FILTER_BAR_INNER_CLASS =
-  "grid w-full grid-cols-4 gap-1.5 md:flex md:h-full md:items-center md:gap-2 md:overflow-x-auto md:px-8";
+const FILTER_BUTTON_CLASS = "h-9 shrink-0 cursor-pointer rounded-lg px-4 text-sm font-medium";
+const FILTER_BAR_CLASS = "-mx-4 h-[70px] md:-mx-8";
+const FILTER_BAR_INNER_CLASS = "flex h-full w-full items-center gap-2 overflow-x-auto px-4 md:px-8";
 const DASHBOARD_GRID_CLASS =
   "grid min-h-0 flex-1 grid-cols-1 auto-rows-[172px] gap-4 overflow-y-auto pb-4 sm:grid-cols-2 sm:auto-rows-[184px] sm:pb-0 lg:overflow-hidden lg:pb-0";
 const DASHBOARD_CARD_CLASS =
