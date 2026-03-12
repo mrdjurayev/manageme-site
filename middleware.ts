@@ -10,6 +10,24 @@ function isSafeRedirectPath(pathname: string): boolean {
   return pathname.startsWith("/") && !pathname.startsWith("//");
 }
 
+async function updateSessionWithRetry(request: NextRequest, attempts: number = 2) {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await updateSession(request);
+    } catch (error) {
+      lastError = error;
+
+      if (attempt < attempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 80));
+      }
+    }
+  }
+
+  throw lastError;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const isAuthRoute = AUTH_ROUTES.has(pathname);
@@ -27,7 +45,7 @@ export async function middleware(request: NextRequest) {
   let sessionResult: Awaited<ReturnType<typeof updateSession>>;
 
   try {
-    sessionResult = await updateSession(request);
+    sessionResult = await updateSessionWithRetry(request, 2);
   } catch (error) {
     // Prevents hard 500 from middleware when runtime configuration is temporarily invalid.
     console.error("Middleware session update failed", error);

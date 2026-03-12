@@ -20,6 +20,7 @@ type LockedAuthConfig = {
 const FAST_USER_SCAN_PAGES = 3;
 const FULL_USER_SCAN_PAGES = 50;
 const LOCKED_USER_ID_CACHE = new Map<string, string>();
+const SIGN_IN_RETRY_DELAYS_MS = [0, 200, 500] as const;
 
 function getValue(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -58,6 +59,41 @@ function getSafeRedirectPath(value: string): string {
 
 function toQueryMessage(basePath: string, key: "error", message: string): string {
   return `${basePath}?${key}=${encodeURIComponent(message)}`;
+}
+
+async function sleep(ms: number): Promise<void> {
+  if (ms <= 0) {
+    return;
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function signInWithRetry(
+  email: string,
+  password: string,
+  delays: readonly number[] = SIGN_IN_RETRY_DELAYS_MS,
+) {
+  let lastError: { message?: string } | null = null;
+
+  for (const delayMs of delays) {
+    await sleep(delayMs);
+
+    // Recreate client on each retry to avoid stale auth state between attempts.
+    const supabase = await createClient();
+    const result = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (!result.error) {
+      return { ok: true as const };
+    }
+
+    lastError = result.error;
+  }
+
+  return { ok: false as const, error: lastError };
 }
 
 async function getClientIp(): Promise<string> {
@@ -204,17 +240,13 @@ export async function signInAction(formData: FormData) {
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
-  const supabase = await createClient();
-  const signInResult = await supabase.auth.signInWithPassword({
-    email: lockedAuth.email,
-    password: lockedAuth.password,
-  });
+  const signInResult = await signInWithRetry(lockedAuth.email, lockedAuth.password, [0, 200]);
 
-  if (!signInResult.error) {
+  if (signInResult.ok) {
     redirect(redirectTo);
   }
 
-  if (!isInvalidCredentialsErrorMessage(signInResult.error.message)) {
+  if (!isInvalidCredentialsErrorMessage(signInResult.error?.message)) {
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
@@ -232,12 +264,9 @@ export async function signInAction(formData: FormData) {
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
-  const retryResult = await supabase.auth.signInWithPassword({
-    email: lockedAuth.email,
-    password: lockedAuth.password,
-  });
+  const retryResult = await signInWithRetry(lockedAuth.email, lockedAuth.password);
 
-  if (retryResult.error) {
+  if (!retryResult.ok) {
     redirect(toQueryMessage("/login", "error", loginErrorMessage));
   }
 
