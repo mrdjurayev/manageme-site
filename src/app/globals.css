@@ -26,9 +26,11 @@ body {
   border: 1px solid var(--btn-dark);
   cursor: pointer;
 }
-
 @media (min-width: 1024px) {
   .app-shell-scale {
-    zoom: 1.1;
+    transform: scale(1.1);
+    transform-origin: top left;
+    width: calc(100vw / 1.1);
+    height: calc(100dvh / 1.1);
   }
 }

@@ -24,7 +24,30 @@ export async function middleware(request: NextRequest) {
     return applySecurityHeaders(response);
   }
 
-  const { response, user } = await updateSession(request);
+  let sessionResult: Awaited<ReturnType<typeof updateSession>>;
+
+  try {
+    sessionResult = await updateSession(request);
+  } catch (error) {
+    // Prevents hard 500 from middleware when runtime configuration is temporarily invalid.
+    console.error("Middleware session update failed", error);
+
+    if (isAuthRoute) {
+      const response = NextResponse.next({ request });
+      return applySecurityHeaders(response);
+    }
+
+    const loginUrl = new URL("/login", request.url);
+    const requestedPath = `${pathname}${search}`;
+
+    if (isSafeRedirectPath(requestedPath)) {
+      loginUrl.searchParams.set("redirectTo", requestedPath);
+    }
+
+    return applySecurityHeaders(NextResponse.redirect(loginUrl));
+  }
+
+  const { response, user } = sessionResult;
 
   if (!user && !isAuthRoute) {
     const loginUrl = new URL("/login", request.url);
