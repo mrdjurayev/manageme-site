@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node --experimental-strip-types --test src/lib/security/client-ip.test.ts",
+    "check": "npm run lint && npm run test && npx tsc --noEmit",
     "setup:hooks": "git config core.hooksPath .githooks",
     "check:secrets": "bash scripts/secret-scan.sh tracked"
   },

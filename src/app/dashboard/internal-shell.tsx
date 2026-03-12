@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Bell,
   BookOpen,
@@ -20,11 +20,18 @@ import {
   Video,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { signOutAction } from "@/lib/actions/auth";
 
 type MenuItem = {
   name: string;
   icon: LucideIcon;
   section: string | null;
+};
+type DashboardCategory = "News" | "Announcements" | "Requirements";
+type DashboardFilter = "All" | DashboardCategory;
+type DashboardCardItem = {
+  id: number;
+  category: DashboardCategory;
 };
 
 const menuItems: MenuItem[] = [
@@ -32,39 +39,84 @@ const menuItems: MenuItem[] = [
   { name: "My Subjects", icon: BookOpen, section: "STUDENT" },
   { name: "Lesson Schedule", icon: Calendar, section: null },
   { name: "Assignments", icon: ClipboardList, section: null },
-  { name: "Retake a Subject", icon: RotateCcw, section: null },
+  { name: "Subject Retake", icon: RotateCcw, section: null },
   { name: "Final Exam", icon: HelpCircle, section: null },
   { name: "Individual Plan", icon: ChartNoAxesCombined, section: null },
   { name: "About", icon: Info, section: null },
 ];
+const DASHBOARD_FILTERS: DashboardFilter[] = ["All", "News", "Announcements", "Requirements"];
+const DASHBOARD_CATEGORY_CYCLE: DashboardCategory[] = ["News", "Announcements", "Requirements"];
+const DASHBOARD_CARD_ITEMS: DashboardCardItem[] = Array.from({ length: 12 }, (_, index) => ({
+  id: index + 1,
+  category: DASHBOARD_CATEGORY_CYCLE[index % DASHBOARD_CATEGORY_CYCLE.length],
+}));
 
 const SOFT_DIVIDER_COLOR = "rgba(203,213,225,0.45)";
+const SOFT_BORDER = `0.5px solid ${SOFT_DIVIDER_COLOR}`;
+const HAIRLINE_SIZE = "0.5px";
 const MOBILE_BREAKPOINT = 1024;
+const PRIMARY_TEXT = "rgb(36, 31, 33)";
+const PRIMARY_BG = "rgb(255, 255, 255)";
+const FILTER_BUTTON_CLASS = "h-9 shrink-0 cursor-pointer rounded-lg px-4 text-sm font-medium";
+const FILTER_BAR_CLASS = "-mx-4 h-[70px] md:-mx-8";
+const FILTER_BAR_INNER_CLASS = "flex h-full w-full items-center gap-2 overflow-x-auto px-4 md:px-8";
+const DASHBOARD_GRID_CLASS =
+  "grid min-h-0 flex-1 grid-cols-1 grid-rows-12 gap-4 sm:grid-cols-2 sm:grid-rows-6 md:grid-cols-3 md:grid-rows-4";
+const DASHBOARD_CARD_CLASS = "relative h-full min-h-0 overflow-hidden rounded-lg bg-[rgb(255,255,255)] shadow-none";
+const DASHBOARD_CARD_BORDER_SHADOW = `inset 0 0 0 ${HAIRLINE_SIZE} ${SOFT_DIVIDER_COLOR}`;
+const FILTER_BAR_STYLE = { borderBottom: `${HAIRLINE_SIZE} solid transparent` };
 
 function cn(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");
 }
 
-function formatServerTime(date: Date): string {
-  const day = date.toLocaleDateString("en-GB").replaceAll("/", ".");
-  const time = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+function formatServerTime(date: Date, timeZone: string): string {
+  const day = date.toLocaleDateString("en-GB", { timeZone }).replaceAll("/", ".");
+  const time = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone });
   return `${day} | ${time}`;
 }
 
-export function DashboardShell() {
+type DashboardShellProps = {
+  initialServerTimeIso: string;
+  serverTimeZone?: string;
+};
+
+export function DashboardShell({ initialServerTimeIso, serverTimeZone }: DashboardShellProps) {
+  const normalizedServerTimeZone = serverTimeZone || "UTC";
+  const initialServerEpoch = Date.parse(initialServerTimeIso);
+
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("Dashboard");
-  const [currentTime, setCurrentTime] = useState(() => formatServerTime(new Date()));
+  const [activeFilter, setActiveFilter] = useState<DashboardFilter>("All");
+  const [currentTime, setCurrentTime] = useState(() =>
+    formatServerTime(
+      new Date(Number.isFinite(initialServerEpoch) ? initialServerEpoch : 0),
+      normalizedServerTimeZone,
+    ),
+  );
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
   const notifRef = useRef<HTMLDivElement | null>(null);
   const profileRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const timer = window.setInterval(() => setCurrentTime(formatServerTime(new Date())), 30_000);
+    const baseServerMs = Number.isFinite(initialServerEpoch) ? initialServerEpoch : Date.now();
+    const startedAtMs = Date.now();
+
+    const tick = () => {
+      const elapsedMs = Date.now() - startedAtMs;
+      setCurrentTime(formatServerTime(new Date(baseServerMs + elapsedMs), normalizedServerTimeZone));
+    };
+
+    tick();
+
+    const timer = window.setInterval(() => {
+      tick();
+    }, 30_000);
+
     return () => window.clearInterval(timer);
-  }, []);
+  }, [initialServerEpoch, normalizedServerTimeZone]);
 
   useEffect(() => {
     const handleDocumentPointerDown = (event: PointerEvent) => {
@@ -117,26 +169,34 @@ export function DashboardShell() {
   };
 
   const sidebarClassName = cn(
-    "custom-scrollbar fixed bottom-0 left-0 top-20 z-40 w-[260px] overflow-x-hidden overflow-y-auto bg-white text-[rgb(36,31,33)] transition-[transform,width] duration-200 ease-out",
+    "custom-scrollbar fixed bottom-0 left-0 top-20 z-40 w-[260px] overflow-x-hidden overflow-y-auto bg-white text-[rgb(36,31,33)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform",
     mobileSidebarOpen ? "translate-x-0" : "-translate-x-full",
     "lg:relative lg:bottom-auto lg:left-0 lg:top-auto lg:translate-x-0",
     desktopSidebarCollapsed ? "lg:w-0 lg:min-w-0 lg:overflow-hidden" : "lg:w-[260px]",
   );
+  const dashboardCards = useMemo(
+    () =>
+      activeFilter === "All"
+        ? DASHBOARD_CARD_ITEMS
+        : DASHBOARD_CARD_ITEMS.filter((item) => item.category === activeFilter),
+    [activeFilter],
+  );
 
   return (
-    <div className="app-shell-scale flex h-screen flex-col overflow-hidden bg-[#f4f7fe] font-sans text-slate-700">
-      {mobileSidebarOpen ? (
-        <button
-          type="button"
-          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
-          onClick={() => setMobileSidebarOpen(false)}
-          aria-label="Close menu"
-        />
-      ) : null}
+    <div className="app-shell-scale flex h-[100dvh] flex-col overflow-hidden bg-[#f4f7fe] font-sans text-slate-700">
+      <button
+        type="button"
+        className={cn(
+          "fixed inset-0 z-30 bg-black/30 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden",
+          mobileSidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+        )}
+        onClick={() => setMobileSidebarOpen(false)}
+        aria-label="Close menu"
+      />
 
       <header
         className="z-50 flex h-20 items-center justify-between bg-white px-2 md:px-6"
-        style={{ borderBottom: `0.5px solid ${SOFT_DIVIDER_COLOR}` }}
+        style={{ borderBottom: SOFT_BORDER }}
       >
         <div className="flex h-full min-w-0 items-center gap-2 md:gap-3">
           <div className="-ml-0.5 shrink-0 p-0 md:-ml-1">
@@ -189,7 +249,10 @@ export function DashboardShell() {
             </button>
 
             {isNotifOpen ? (
-              <div className="absolute right-[-10px] mt-4 w-[320px] overflow-hidden rounded-md border border-slate-100 bg-white shadow-2xl">
+              <div
+                className="fixed left-1/2 top-[88px] z-50 w-[min(17.5rem,calc(100vw-1.5rem))] -translate-x-1/2 overflow-hidden rounded-md bg-white md:absolute md:left-auto md:right-[-10px] md:top-auto md:mt-4 md:w-[320px] md:translate-x-0"
+                style={{ border: SOFT_BORDER, boxShadow: "none" }}
+              >
                 <div className="bg-[rgb(36,31,33)] p-3 text-[13px] font-bold text-white">Notifications</div>
                 <div className="flex cursor-pointer gap-4 border-b border-slate-50 p-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[rgb(250,250,250)] text-[rgb(36,31,33)]">
@@ -224,7 +287,10 @@ export function DashboardShell() {
             </button>
 
             {isProfileOpen ? (
-              <div className="absolute right-0 mt-4 w-52 overflow-hidden rounded-md border border-slate-100 bg-white shadow-2xl">
+              <div
+                className="absolute right-0 mt-4 w-52 overflow-hidden rounded-md bg-white"
+                style={{ border: SOFT_BORDER, boxShadow: "none" }}
+              >
                 <div className="bg-[rgb(36,31,33)] p-3.5 text-white">
                   <p className="text-[13px] font-bold uppercase leading-tight tracking-wide">Abdullox</p>
                   <p className="text-[12px] font-medium text-[#6b7280]">Jurayev</p>
@@ -233,9 +299,14 @@ export function DashboardShell() {
                   <button className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left text-[13px] text-[rgb(36,31,33)]">
                     <Settings size={15} className="text-[rgb(36,31,33)]" /> Profile Settings
                   </button>
-                  <button className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left text-[13px] text-[rgb(36,31,33)]">
-                    <LogOut size={15} className="text-[rgb(36,31,33)]" /> Logout
-                  </button>
+                  <form action={signOutAction}>
+                    <button
+                      type="submit"
+                      className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left text-[13px] text-[rgb(36,31,33)]"
+                    >
+                      <LogOut size={15} className="text-[rgb(36,31,33)]" /> Logout
+                    </button>
+                  </form>
                 </div>
               </div>
             ) : null}
@@ -244,7 +315,7 @@ export function DashboardShell() {
       </header>
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <aside className={sidebarClassName} style={{ borderRight: `0.5px solid ${SOFT_DIVIDER_COLOR}` }}>
+        <aside className={sidebarClassName} style={{ borderRight: SOFT_BORDER }}>
           <div className="w-[260px]">
             <nav className="pb-4 pt-3 text-sm">
               {menuItems.map((item) => {
@@ -279,7 +350,46 @@ export function DashboardShell() {
           </div>
         </aside>
 
-        <main className="custom-scrollbar min-w-0 flex-1 overflow-y-auto bg-[rgb(250,250,250)] p-4 md:p-8" />
+        <main className="min-w-0 flex flex-1 flex-col overflow-hidden bg-[rgb(250,250,250)] px-4 pb-4 md:px-8 md:pb-8">
+          <div className={FILTER_BAR_CLASS} style={FILTER_BAR_STYLE}>
+            <div className={FILTER_BAR_INNER_CLASS}>
+              {DASHBOARD_FILTERS.map((filter) => {
+                const isActive = activeFilter === filter;
+                return (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setActiveFilter(filter)}
+                    className={FILTER_BUTTON_CLASS}
+                    style={{
+                      border: SOFT_BORDER,
+                      backgroundColor: isActive ? PRIMARY_TEXT : PRIMARY_BG,
+                      color: isActive ? PRIMARY_BG : PRIMARY_TEXT,
+                    }}
+                    aria-pressed={isActive}
+                  >
+                    {filter}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <section
+            className={cn(
+              DASHBOARD_GRID_CLASS,
+              desktopSidebarCollapsed ? "lg:grid-cols-4 lg:grid-rows-3" : "lg:grid-cols-3 lg:grid-rows-4",
+            )}
+          >
+            {dashboardCards.map((card) => (
+              <article
+                key={`${activeFilter}-${card.id}`}
+                className={DASHBOARD_CARD_CLASS}
+                style={{ boxShadow: DASHBOARD_CARD_BORDER_SHADOW }}
+                aria-label={`${card.category} card ${card.id}`}
+              />
+            ))}
+          </section>
+        </main>
       </div>
 
       <style jsx global>{`

@@ -74,6 +74,7 @@ Security behavior:
    - `supabase/migrations/20260304_000001_auth_profiles.sql`
    - `supabase/migrations/20260304_000002_seasons_subjects.sql`
    - `supabase/migrations/20260305_000003_schedule_attendance.sql`
+   - `supabase/migrations/20260312_000004_set_active_season.sql`
 5. These migrations create `profiles`, `seasons`, `subjects`, `schedule_lessons`, `attendance_records` tables with strict RLS policies.
 
 ## 5) Vercel Deployment

@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getServerEnv } from "@/lib/env/server";
+import { resolveClientIp } from "@/lib/security/client-ip";
 import { blockKey, isRateLimited, isTemporarilyBlocked } from "@/lib/security/rate-limit";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { createClient } from "@/lib/supabase/server";
@@ -15,6 +16,10 @@ type LockedAuthConfig = {
   password: string;
   email: string;
 };
+
+const FAST_USER_SCAN_PAGES = 3;
+const FULL_USER_SCAN_PAGES = 50;
+const LOCKED_USER_ID_CACHE = new Map<string, string>();
 
 function getValue(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -57,14 +62,7 @@ function toQueryMessage(basePath: string, key: "error", message: string): string
 
 async function getClientIp(): Promise<string> {
   const headersList = await headers();
-  const forwardedFor = headersList.get("x-forwarded-for");
-  const ip = forwardedFor?.split(",")[0]?.trim();
-
-  if (ip) {
-    return ip;
-  }
-
-  return headersList.get("x-real-ip") ?? "unknown";
+  return resolveClientIp((headerName) => headersList.get(headerName));
 }
 
 function getLockedAuthConfig(): LockedAuthConfig {
@@ -79,11 +77,26 @@ function getLockedAuthConfig(): LockedAuthConfig {
   return { login, password, email };
 }
 
-async function findLockedUserIdByEmail(email: string): Promise<string | null> {
+function cacheLockedUserId(email: string, userId: string): string {
+  LOCKED_USER_ID_CACHE.set(email.toLowerCase(), userId);
+  return userId;
+}
+
+async function findLockedUserIdByEmail(
+  email: string,
+  maxPages: number = FULL_USER_SCAN_PAGES,
+): Promise<string | null> {
+  const normalizedEmail = email.toLowerCase();
+  const cachedUserId = LOCKED_USER_ID_CACHE.get(normalizedEmail);
+  if (cachedUserId) {
+    return cachedUserId;
+  }
+
   const serviceRole = createServiceRoleClient();
   const perPage = 200;
+  let page = 1;
 
-  for (let page = 1; page <= 50; page += 1) {
+  for (let scannedPages = 0; scannedPages < maxPages; scannedPages += 1) {
     const { data, error } = await serviceRole.auth.admin.listUsers({
       page,
       perPage,
@@ -94,14 +107,17 @@ async function findLockedUserIdByEmail(email: string): Promise<string | null> {
     }
 
     const users = data.users ?? [];
-    const existingUser = users.find((user) => user.email?.toLowerCase() === email.toLowerCase());
+    const existingUser = users.find((user) => user.email?.toLowerCase() === normalizedEmail);
     if (existingUser) {
-      return existingUser.id;
+      return cacheLockedUserId(normalizedEmail, existingUser.id);
     }
 
-    if (users.length < perPage) {
+    const nextPage = data.nextPage;
+    if (!nextPage || nextPage <= page) {
       break;
     }
+
+    page = nextPage;
   }
 
   return null;
@@ -109,7 +125,7 @@ async function findLockedUserIdByEmail(email: string): Promise<string | null> {
 
 async function ensureLockedUserExists(config: LockedAuthConfig): Promise<string> {
   const serviceRole = createServiceRoleClient();
-  const existingUserId = await findLockedUserIdByEmail(config.email);
+  const existingUserId = await findLockedUserIdByEmail(config.email, FAST_USER_SCAN_PAGES);
 
   if (existingUserId) {
     return existingUserId;
@@ -125,14 +141,14 @@ async function ensureLockedUserExists(config: LockedAuthConfig): Promise<string>
   });
 
   if (error || !data.user) {
-    const recoveredUserId = await findLockedUserIdByEmail(config.email);
+    const recoveredUserId = await findLockedUserIdByEmail(config.email, FULL_USER_SCAN_PAGES);
     if (recoveredUserId) {
       return recoveredUserId;
     }
     throw new Error("Unable to create locked user.");
   }
 
-  return data.user.id;
+  return cacheLockedUserId(config.email, data.user.id);
 }
 
 async function forceLockedPassword(userId: string, config: LockedAuthConfig) {

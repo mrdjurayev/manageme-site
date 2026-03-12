@@ -88,10 +88,39 @@ export async function setActiveSeasonAction(formData: FormData) {
     redirect(toDashboardMessage("error", "Noto'g'ri season id."));
   }
 
+  const rpcResult = await supabase.rpc("set_active_season", {
+    p_season_id: seasonId,
+  });
+
+  if (!rpcResult.error) {
+    redirect(toDashboardMessage("message", "Active season yangilandi."));
+  }
+
+  // Backward-compatible fallback if the migration wasn't applied yet.
+  const functionMissing =
+    rpcResult.error.code === "42883" ||
+    rpcResult.error.code === "PGRST202" ||
+    /set_active_season/i.test(rpcResult.error.message ?? "");
+
+  if (!functionMissing) {
+    redirect(toDashboardMessage("error", "Active season yangilanmadi."));
+  }
+
+  const targetSeason = await supabase
+    .from("seasons")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("id", seasonId);
+
+  if (targetSeason.error || !targetSeason.data.length) {
+    redirect(toDashboardMessage("error", "Season aktiv holatga o'tmadi."));
+  }
+
   const clearResult = await supabase
     .from("seasons")
     .update({ is_active: false })
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .neq("id", seasonId);
 
   if (clearResult.error) {
     redirect(toDashboardMessage("error", "Active season yangilanmadi."));
@@ -101,9 +130,10 @@ export async function setActiveSeasonAction(formData: FormData) {
     .from("seasons")
     .update({ is_active: true })
     .eq("user_id", userId)
-    .eq("id", seasonId);
+    .eq("id", seasonId)
+    .select("id");
 
-  if (activateResult.error) {
+  if (activateResult.error || !activateResult.data.length) {
     redirect(toDashboardMessage("error", "Season aktiv holatga o'tmadi."));
   }
 
