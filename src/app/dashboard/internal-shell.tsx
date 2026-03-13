@@ -35,6 +35,7 @@ type DashboardCardItem = {
   title: string;
   description: string;
   dateTime: string;
+  details: string;
 };
 
 const menuItems: MenuItem[] = [
@@ -50,46 +51,65 @@ const menuItems: MenuItem[] = [
 const DASHBOARD_FILTERS: DashboardFilter[] = ["All", "News", "Announcements", "Requirements"];
 const DASHBOARD_CARD_ITEMS: DashboardCardItem[] = [
   {
-    id: 1,
-    category: "News",
-    title: "Semester update",
-    description: "The academic calendar has been updated for the next study block and key classroom activities...",
-    dateTime: "13.03.2026 | 09:15",
-  },
-  {
     id: 2,
     category: "Announcements",
-    title: "This website",
-    description: "This website was developed by AJ Development and monitors the users learning over a certain period of time...",
-    dateTime: "12.03.2026 | 08:08",
+    title: "Website overview",
+    description: "This website was developed by AJ Development and tracks learning progress over time...",
+    dateTime: "13.03.2026 | 21:30",
+    details: "",
   },
   {
     id: 3,
-    category: "Requirements",
-    title: "Document check",
-    description: "Please review the required documents list before the next submission deadline and upload updates...",
-    dateTime: "11.03.2026 | 17:40",
-  },
-  {
-    id: 4,
-    category: "News",
-    title: "Classroom notice",
-    description: "A new classroom allocation has been published for this week and students should review changes...",
-    dateTime: "10.03.2026 | 11:25",
+    category: "Announcements",
+    title: "Assignment review",
+    description:
+      "Assignments uploaded to the system are reviewed automatically or with AI support, and the results are highly accurate.",
+    dateTime: "13.03.2026 | 21:10",
+    details: "",
   },
   {
     id: 5,
     category: "Announcements",
-    title: "System notice",
-    description: "Platform improvements were released today to make schedule tracking and subject monitoring easier...",
-    dateTime: "09.03.2026 | 14:05",
+    title: "Semester structure",
+    description:
+      "The system has four semesters each year. During these semesters, students study, complete practical training, and take final exams.",
+    dateTime: "13.03.2026 | 20:50",
+    details: "",
   },
   {
     id: 6,
     category: "Requirements",
     title: "Attendance rules",
-    description: "Attendance records must be checked weekly to avoid missing any important status updates or warnings...",
-    dateTime: "08.03.2026 | 10:30",
+    description:
+      "Students must familiarize themselves with the system's attendance rules and the terms of the contract.",
+    dateTime: "13.03.2026 | 21:05",
+    details: "",
+  },
+  {
+    id: 7,
+    category: "Requirements",
+    title: "Assignments",
+    description: "Students must complete assignments on time and upload them to the system.",
+    dateTime: "13.03.2026 | 21:20",
+    details: "",
+  },
+  {
+    id: 8,
+    category: "Requirements",
+    title: "Assessment criteria",
+    description:
+      "Students are evaluated based on their activity during the season and the results of their assigned tasks.",
+    dateTime: "13.03.2026 | 21:35",
+    details: "",
+  },
+  {
+    id: 9,
+    category: "Requirements",
+    title: "Contract terms",
+    description:
+      "The terms of the contract are established between the system and the student, and compliance with them is mandatory.",
+    dateTime: "13.03.2026 | 21:40",
+    details: "",
   },
 ];
 
@@ -101,15 +121,35 @@ const PRIMARY_TEXT = "rgb(36, 31, 33)";
 const PRIMARY_BG = "rgb(255, 255, 255)";
 const FILTER_BUTTON_CLASS = "h-9 shrink-0 cursor-pointer rounded-lg px-4 text-sm font-medium";
 const FILTER_BAR_CLASS = "-mx-4 h-[70px] md:-mx-8";
-const FILTER_BAR_INNER_CLASS = "flex h-full w-full items-center gap-2 overflow-x-auto px-4 md:px-8";
+const FILTER_BAR_INNER_CLASS = "mobile-scrollbar-hidden flex h-full w-full items-center gap-2 overflow-x-auto px-4 md:px-8";
 const DASHBOARD_GRID_CLASS =
-  "grid min-h-0 flex-1 grid-cols-1 auto-rows-[172px] gap-4 overflow-y-auto pb-4 sm:grid-cols-2 sm:auto-rows-[184px] sm:pb-0 lg:overflow-hidden lg:pb-0";
+  "custom-scrollbar grid min-h-0 flex-1 grid-cols-1 auto-rows-[168px] gap-4 overflow-y-auto pb-4 pr-1 sm:grid-cols-2 sm:auto-rows-[180px] sm:pb-0 lg:auto-rows-[180px]";
 const DASHBOARD_CARD_CLASS =
   "relative min-h-0 overflow-hidden rounded-lg bg-[rgb(255,255,255)] shadow-none lg:h-full";
+const DASHBOARD_CARD_CONTENT_CLASS = "grid h-full grid-rows-[auto,1fr,auto] gap-1.5 p-3 sm:p-3.5";
+const DASHBOARD_CARD_TITLE_CLASS =
+  "text-[15px] font-semibold leading-none tracking-[0.01em] text-[rgb(36,31,33)] sm:text-[17px]";
+const DASHBOARD_CARD_DESCRIPTION_CLASS =
+  "max-w-full text-[10px] leading-[1.4] text-[rgb(36,31,33)] sm:max-w-[29ch] sm:text-[11px]";
+const DASHBOARD_CARD_FOOTER_CLASS = "flex items-center justify-between gap-2";
+const DASHBOARD_CARD_DATE_CLASS = "text-[10px] font-medium leading-none sm:text-[11px]";
+const DASHBOARD_CARD_BUTTON_CLASS =
+  "shrink-0 cursor-pointer rounded-lg bg-[#fafafa] px-3 py-2 text-[11px] font-medium leading-none text-[rgb(36,31,33)] outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 active:bg-[#fafafa] hover:bg-[#fafafa] sm:px-4 sm:text-[12px]";
 const DASHBOARD_CARD_BORDER_SHADOW = `inset 0 0 0 ${HAIRLINE_SIZE} ${SOFT_DIVIDER_COLOR}`;
+const DASHBOARD_CARD_DESCRIPTION_STYLE = {
+  display: "-webkit-box",
+  WebkitBoxOrient: "vertical" as const,
+  WebkitLineClamp: 2,
+  overflow: "hidden",
+};
 const FILTER_BAR_STYLE = { borderBottom: `${HAIRLINE_SIZE} solid transparent` };
 const CARD_READ_MORE_LABEL = "Read more";
+const MODAL_CLOSE_LABEL = "Close";
 const LOGIN_PLACEHOLDER_COLOR = "#6b7280";
+const DASHBOARD_MODAL_PANEL_CLASS =
+  "custom-scrollbar w-[min(34rem,calc(100vw-1.5rem))] max-h-[min(34rem,calc(100dvh-2rem))] overflow-y-auto rounded-xl bg-white p-5 sm:p-6";
+const DASHBOARD_MODAL_CLOSE_BUTTON_CLASS =
+  "h-9 shrink-0 cursor-pointer rounded-lg px-4 text-sm font-medium outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 active:bg-[rgb(36,31,33)] hover:bg-[rgb(36,31,33)]";
 
 function cn(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");
@@ -134,6 +174,7 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("Dashboard");
   const [activeFilter, setActiveFilter] = useState<DashboardFilter>("All");
+  const [selectedCard, setSelectedCard] = useState<DashboardCardItem | null>(null);
   const [currentTime, setCurrentTime] = useState(() =>
     formatServerTime(
       new Date(Number.isFinite(initialServerEpoch) ? initialServerEpoch : 0),
@@ -188,6 +229,24 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
       document.removeEventListener("pointerdown", handleDocumentPointerDown);
     };
   }, []);
+
+  useEffect(() => {
+    if (!selectedCard) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedCard(null);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedCard]);
 
   const toggleSidebar = () => {
     if (window.innerWidth < MOBILE_BREAKPOINT) {
@@ -422,9 +481,7 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
           <section
             className={cn(
               DASHBOARD_GRID_CLASS,
-              desktopSidebarCollapsed
-                ? "lg:grid-cols-3 lg:grid-rows-2 lg:auto-rows-auto"
-                : "lg:grid-cols-2 lg:grid-rows-3 lg:auto-rows-auto",
+              desktopSidebarCollapsed ? "lg:grid-cols-3" : "lg:grid-cols-2",
             )}
           >
             {dashboardCards.map((card) => (
@@ -434,30 +491,21 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
                 style={{ boxShadow: DASHBOARD_CARD_BORDER_SHADOW }}
                 aria-label={`${card.category} card ${card.id}`}
               >
-                <div className="grid h-full grid-rows-[auto,1fr,auto] gap-2 p-3.5 sm:p-4">
-                  <p className="text-[16px] font-semibold leading-none tracking-[0.01em] text-[rgb(36,31,33)] sm:text-[18px]">
-                    {card.title}
-                  </p>
+                <div className={DASHBOARD_CARD_CONTENT_CLASS}>
+                  <p className={DASHBOARD_CARD_TITLE_CLASS}>{card.title}</p>
                   <div className="min-h-0 overflow-hidden">
-                    <p
-                      className="max-w-full text-[10px] leading-[1.45] text-[rgb(36,31,33)] sm:max-w-[29ch] sm:text-[11px]"
-                      style={{
-                        display: "-webkit-box",
-                        WebkitBoxOrient: "vertical",
-                        WebkitLineClamp: 2,
-                        overflow: "hidden",
-                      }}
-                    >
+                    <p className={DASHBOARD_CARD_DESCRIPTION_CLASS} style={DASHBOARD_CARD_DESCRIPTION_STYLE}>
                       {card.description}
                     </p>
                   </div>
-                  <div className="flex items-center justify-between gap-2 sm:gap-3">
-                    <p className="text-[10px] font-medium leading-none sm:text-[11px]" style={{ color: LOGIN_PLACEHOLDER_COLOR }}>
+                  <div className={DASHBOARD_CARD_FOOTER_CLASS}>
+                    <p className={DASHBOARD_CARD_DATE_CLASS} style={{ color: LOGIN_PLACEHOLDER_COLOR }}>
                       {card.dateTime}
                     </p>
                     <button
                       type="button"
-                      className="shrink-0 cursor-pointer rounded-lg bg-[#fafafa] px-3 py-2 text-[11px] font-medium leading-none text-[rgb(36,31,33)] outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 active:bg-[#fafafa] hover:bg-[#fafafa] sm:px-4 sm:text-[12px]"
+                      onClick={() => setSelectedCard(card)}
+                      className={DASHBOARD_CARD_BUTTON_CLASS}
                       style={{ boxShadow: DASHBOARD_CARD_BORDER_SHADOW }}
                     >
                       {CARD_READ_MORE_LABEL}
@@ -470,7 +518,63 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
         </main>
       </div>
 
+      {selectedCard ? (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 px-3 py-4"
+          onClick={() => setSelectedCard(null)}
+        >
+          <div
+            className={DASHBOARD_MODAL_PANEL_CLASS}
+            style={{ boxShadow: DASHBOARD_CARD_BORDER_SHADOW }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <h2 className="text-[22px] font-semibold leading-tight text-[rgb(36,31,33)]">{selectedCard.title}</h2>
+                <p className="text-sm leading-6 text-[rgb(36,31,33)]">{selectedCard.description}</p>
+              </div>
+              <div className="min-h-[120px] rounded-lg bg-[#fafafa] p-4" style={{ boxShadow: DASHBOARD_CARD_BORDER_SHADOW }}>
+                {selectedCard.details ? (
+                  <p className="text-sm leading-6 text-[rgb(36,31,33)]">{selectedCard.details}</p>
+                ) : null}
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-medium text-[#6b7280]">{selectedCard.dateTime}</p>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCard(null)}
+                  className={DASHBOARD_MODAL_CLOSE_BUTTON_CLASS}
+                  style={{
+                    border: SOFT_BORDER,
+                    backgroundColor: PRIMARY_TEXT,
+                    color: PRIMARY_BG,
+                  }}
+                >
+                  {MODAL_CLOSE_LABEL}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <style jsx global>{`
+        .mobile-scrollbar-hidden {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .mobile-scrollbar-hidden::-webkit-scrollbar {
+          display: none;
+        }
+        @media (min-width: 768px) {
+          .mobile-scrollbar-hidden {
+            -ms-overflow-style: auto;
+            scrollbar-width: auto;
+          }
+          .mobile-scrollbar-hidden::-webkit-scrollbar {
+            display: initial;
+          }
+        }
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
           height: 4px;
