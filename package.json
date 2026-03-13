@@ -2,12 +2,14 @@
   "name": "manageme",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1 --port 3000",
-    "build": "next build",
+    "build": "next build --webpack",
+    "build:turbopack": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test src/lib/security/client-ip.test.ts",
+    "test": "node --experimental-strip-types --test src/lib/security/client-ip.test.mts",
     "check": "npm run lint && npm run test && npx tsc --noEmit",
     "setup:hooks": "git config core.hooksPath .githooks",
     "check:secrets": "bash scripts/secret-scan.sh tracked"
