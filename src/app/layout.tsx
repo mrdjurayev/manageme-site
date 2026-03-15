@@ -34,7 +34,7 @@ const plexMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "ManageMe LMS",
+  title: "ManageMe",
   description: "Personal learning management system",
   icons: {
     icon: [

@@ -10,12 +10,12 @@ export function SubmitButton() {
       type="submit"
       disabled={pending}
       aria-disabled={pending}
-      className="mt-2 h-12 w-full rounded-lg border border-[rgb(36,31,33)] bg-[rgb(36,31,33)] text-[22px] font-medium text-[#f2f2f2] cursor-pointer outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 active:bg-[rgb(36,31,33)] hover:bg-[rgb(36,31,33)] disabled:cursor-not-allowed disabled:bg-[rgb(36,31,33)]"
+      className="ui-text-button-lg mt-2 h-12 w-full cursor-pointer rounded-lg border border-[var(--ui-primary)] bg-[var(--ui-primary)] font-medium text-[var(--ui-text-inverse)] outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 active:bg-[var(--ui-primary)] hover:bg-[var(--ui-primary)] disabled:cursor-not-allowed disabled:bg-[var(--ui-primary)]"
     >
       {pending ? (
         <span className="inline-flex items-center justify-center" aria-label="Loading">
           <svg
-            className="h-6 w-6 animate-spin text-[#f2f2f2]"
+            className="h-6 w-6 animate-spin text-[var(--ui-text-inverse)]"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

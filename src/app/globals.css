@@ -1,23 +1,178 @@
 @import "tailwindcss";
 
 :root {
-  --ui-paper: #f2f2f2;
-  --ui-ink: #1f1f1f;
-  --btn-dark: #283040;
-  --btn-dark-text: #f2f2f2;
+  --ui-page-bg: #f3f4f6;
+  --ui-shell-bg: #f4f7fe;
+  --ui-canvas-bg: #fafafa;
+  --ui-surface: #ffffff;
+  --ui-surface-muted: #fafafa;
+  --ui-text-primary: #241f21;
+  --ui-text-secondary: #6b7280;
+  --ui-text-inverse: #ffffff;
+  --ui-text-inverse-muted: rgba(255, 255, 255, 0.72);
+  --ui-border: #e5e7eb;
+  --ui-border-subtle: #eceff3;
+  --ui-divider-soft: rgba(203, 213, 225, 0.45);
+  --ui-scrollbar: #cbd5e1;
+  --ui-scrollbar-hover: #94a3b8;
+  --ui-danger: #ef4444;
+  --ui-overlay: rgba(0, 0, 0, 0.3);
+  --ui-shadow-strong: rgba(31, 31, 31, 0.06);
+  --ui-shadow-soft: rgba(31, 31, 31, 0.04);
+  --ui-primary: var(--ui-text-primary);
+
+  --ui-font-brand: 14px;
+  --ui-font-overline: 11px;
+  --ui-font-form-label: 13px;
+  --ui-font-caption: 12px;
+  --ui-font-meta: 11px;
+  --ui-font-body-sm: 13px;
+  --ui-font-body: 15px;
+  --ui-font-nav: 15px;
+  --ui-font-card-title: 16px;
+  --ui-font-dialog-title: 20px;
+  --ui-font-dialog-body: 14px;
+  --ui-font-button: 13px;
+  --ui-font-button-lg: 16px;
+  --ui-font-display: clamp(1.32rem, 3.1vw, 1.95rem);
+  --ui-font-page-title: clamp(1.4rem, 3vw, 2rem);
+  --ui-font-badge: 8px;
+
+  --ui-paper: var(--ui-page-bg);
+  --ui-ink: var(--ui-text-primary);
+  --btn-dark: var(--ui-primary);
+  --btn-dark-text: var(--ui-text-inverse);
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --ui-font-brand: 16px;
+    --ui-font-nav: 16px;
+    --ui-font-card-title: 17px;
+    --ui-font-dialog-title: 22px;
+    --ui-font-dialog-body: 15px;
+    --ui-font-button: 14px;
+  }
 }
 
 @theme inline {
-  --color-background: var(--ui-paper);
-  --color-foreground: var(--ui-ink);
+  --color-background: var(--ui-page-bg);
+  --color-foreground: var(--ui-text-primary);
   --font-sans: var(--font-manrope);
   --font-mono: var(--font-plex-mono);
 }
 
 body {
-  background: var(--ui-paper);
-  color: var(--ui-ink);
+  background: var(--ui-page-bg);
+  color: var(--ui-text-primary);
   font-family: var(--font-manrope), sans-serif;
+}
+
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--ui-scrollbar);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--ui-scrollbar-hover);
+}
+
+.ui-text-brand {
+  font-size: var(--ui-font-brand);
+  line-height: 1.2;
+}
+
+.ui-text-overline {
+  font-size: var(--ui-font-overline);
+  line-height: 1;
+}
+
+.ui-text-form-label {
+  font-size: var(--ui-font-form-label);
+  line-height: 1.3;
+}
+
+.ui-text-caption {
+  font-size: var(--ui-font-caption);
+  line-height: 1.4;
+}
+
+.ui-text-meta {
+  font-size: var(--ui-font-meta);
+  line-height: 1.35;
+}
+
+.ui-text-body-sm {
+  font-size: var(--ui-font-body-sm);
+  line-height: 1.5;
+}
+
+.ui-text-body {
+  font-size: var(--ui-font-body);
+  line-height: 1.55;
+}
+
+.ui-text-nav {
+  font-size: var(--ui-font-nav);
+  line-height: 1.5;
+}
+
+.ui-text-card-title {
+  font-size: var(--ui-font-card-title);
+  line-height: 1.3;
+}
+
+.ui-text-dialog-title {
+  font-size: var(--ui-font-dialog-title);
+  line-height: 1.2;
+}
+
+.ui-text-dialog-body {
+  font-size: var(--ui-font-dialog-body);
+  line-height: 1.6;
+}
+
+.ui-text-dialog-reading {
+  font-size: var(--ui-font-dialog-body);
+  line-height: 1.75;
+}
+
+.ui-text-button {
+  font-size: var(--ui-font-button);
+  line-height: 1;
+}
+
+.ui-text-button-lg {
+  font-size: var(--ui-font-button-lg);
+  line-height: 1;
+}
+
+.ui-text-display {
+  font-size: var(--ui-font-display);
+  line-height: 1.15;
+}
+
+.ui-text-page-title {
+  font-size: var(--ui-font-page-title);
+  line-height: 1.15;
+}
+
+.ui-text-badge {
+  font-size: var(--ui-font-badge);
+  line-height: 1;
 }
 
 .btn-dark {
