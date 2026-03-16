@@ -26,10 +26,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[var(--ui-page-bg)] px-4 py-8">
-      <section
-        className="min-h-[536px] w-[94vw] rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-surface)] px-6 pb-10 pt-8 sm:w-[90vw] sm:px-8 sm:pb-12 sm:pt-10 md:min-h-[620px] md:w-[74vw] md:max-w-[680px] md:px-10 md:pb-16 md:pt-12 lg:min-h-0 lg:w-1/3 lg:min-w-[430px] lg:max-w-[470px]"
-        style={{ boxShadow: "0 4px 6px -1px var(--ui-shadow-strong), 0 2px 4px -1px var(--ui-shadow-soft)" }}
-      >
+      <section className="min-h-[536px] w-[94vw] rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-surface)] px-6 pb-10 pt-8 sm:w-[90vw] sm:px-8 sm:pb-12 sm:pt-10 md:min-h-[620px] md:w-[74vw] md:max-w-[680px] md:px-10 md:pb-16 md:pt-12 lg:min-h-0 lg:w-1/3 lg:min-w-[430px] lg:max-w-[470px]">
         <div className="mx-auto mb-6 flex h-[92px] w-[92px] items-center justify-center overflow-hidden bg-[var(--ui-primary)]">
           <Image
             src="/manageme-white.png"
