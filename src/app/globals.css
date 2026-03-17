@@ -62,6 +62,37 @@
   --font-mono: var(--font-plex-mono);
 }
 
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-scrollbar) transparent;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: var(--ui-scrollbar);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover {
+  background: var(--ui-scrollbar-hover);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
 body {
   background: var(--ui-page-bg);
   color: var(--ui-text-primary);
@@ -88,6 +119,34 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--ui-scrollbar-hover);
+}
+
+.calendar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-scrollbar) transparent;
+  scrollbar-gutter: stable both-edges;
+}
+
+.calendar-scrollbar::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.calendar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.calendar-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--ui-scrollbar);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+
+.calendar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--ui-scrollbar-hover);
+  border: 3px solid transparent;
+  background-clip: padding-box;
 }
 
 .ui-text-brand {

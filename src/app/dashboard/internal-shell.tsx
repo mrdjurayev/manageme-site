@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { signOutAction } from "@/lib/actions/auth";
+import { LessonScheduleCanvas, LessonScheduleToolbar } from "@/components/lesson-schedule";
 
 type MenuItem = {
   name: string;
@@ -658,6 +659,13 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
               isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
               onCardOpen={setSelectedCard}
             />
+          ) : null}
+
+          {activeMenu === "Lesson Schedule" ? (
+            <div className="min-h-0 flex flex-1 flex-col gap-0 pb-4 pt-0 lg:pb-0">
+              <LessonScheduleToolbar />
+              <LessonScheduleCanvas className="min-h-0 flex-1" />
+            </div>
           ) : null}
         </main>
       </div>
