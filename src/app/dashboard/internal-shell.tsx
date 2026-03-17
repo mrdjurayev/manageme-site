@@ -33,7 +33,6 @@ type DashboardCardItem = {
   title: string;
   description: string;
   dateTime: string;
-  details: string;
 };
 
 type DashboardShellProps = {
@@ -96,72 +95,50 @@ const NOTIFICATION_PREVIEW = {
 const DASHBOARD_CARD_ITEMS: DashboardCardItem[] = [
   {
     id: 1,
-    title: "Platform update",
-    description: "The dashboard now groups academic updates, requirements, and reminders in one place for students.",
-    dateTime: "15.03.2026 | 09:10",
-    details:
-      "This dashboard is designed to keep students informed about study flow, assignment timing, and internal platform updates without leaving the main workspace.",
-  },
-  {
-    id: 2,
     title: "Website overview",
     description: "This website was developed by AJ Development and tracks learning progress over time.",
     dateTime: "13.03.2026 | 21:30",
-    details:
-      "The platform combines timetable visibility, subject flow, assignment submission, and internal academic messaging in one student-facing shell.",
   },
   {
-    id: 3,
+    id: 2,
     title: "Assignment review",
     description:
       "Assignments uploaded to the system are reviewed automatically or with AI support, and the results are highly accurate.",
     dateTime: "13.03.2026 | 21:10",
-    details:
-      "Uploaded assignment work is processed through structured review flows so students can receive consistent and timely feedback after submission.",
   },
   {
-    id: 5,
+    id: 3,
     title: "Semester structure",
     description:
       "The system has four semesters each year. During these semesters, students study, complete practical training, and take final exams.",
     dateTime: "13.03.2026 | 20:50",
-    details:
-      "Each academic cycle is organized around semester-based study, practical workload, and assessment milestones so the dashboard timeline stays predictable.",
   },
   {
-    id: 6,
+    id: 4,
     title: "Attendance rules",
     description:
       "Students must familiarize themselves with the system's attendance rules and the terms of the contract.",
     dateTime: "13.03.2026 | 21:05",
-    details:
-      "Attendance expectations are part of the academic ruleset. Students are expected to understand both lesson participation rules and contractual obligations.",
   },
   {
-    id: 7,
+    id: 5,
     title: "Assignments",
     description: "Students must complete assignments on time and upload them to the system.",
     dateTime: "13.03.2026 | 21:20",
-    details:
-      "Each assignment should be submitted within the stated timeline. Late or missing uploads can affect grading and progress tracking.",
   },
   {
-    id: 8,
+    id: 6,
     title: "Assessment criteria",
     description:
       "Students are evaluated based on their activity during the season and the results of their assigned tasks.",
     dateTime: "13.03.2026 | 21:35",
-    details:
-      "Assessment considers both continuous participation and final task outcomes, so students should treat regular activity as part of their overall performance.",
   },
   {
-    id: 9,
+    id: 7,
     title: "Contract terms",
     description:
       "The terms of the contract are established between the system and the student, and compliance with them is mandatory.",
     dateTime: "13.03.2026 | 21:40",
-    details:
-      "The learning relationship is governed by internal platform rules and formal contract conditions. Compliance is required for continued participation.",
   },
 ];
 
@@ -235,12 +212,6 @@ const DASHBOARD_CARD_FOOTER_CLASS = "flex items-center justify-between gap-3";
 const DASHBOARD_CARD_DATE_CLASS = `ui-text-meta font-medium leading-none ${MUTED_TEXT_CLASS}`;
 const DASHBOARD_CARD_BUTTON_CLASS =
   `ui-text-button shrink-0 cursor-pointer rounded-lg bg-[var(--ui-surface-muted)] px-3.5 py-2 font-medium leading-none ${SURFACE_TEXT_CLASS} outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 active:bg-[var(--ui-surface-muted)] hover:bg-[var(--ui-surface-muted)] lg:px-4`;
-const DASHBOARD_CARD_DESCRIPTION_STYLE: CSSProperties = {
-  display: "-webkit-box",
-  WebkitBoxOrient: "vertical",
-  WebkitLineClamp: 3,
-  overflow: "hidden",
-};
 const DASHBOARD_MODAL_OVERLAY_CLASS =
   "fixed inset-0 z-[60] flex items-center justify-center bg-[var(--ui-overlay)] px-3 py-4";
 const DASHBOARD_MODAL_PANEL_CLASS =
@@ -375,7 +346,7 @@ function DashboardCardGrid({ cards, isDesktopSidebarCollapsed, onCardOpen }: Das
           <div className={DASHBOARD_CARD_CONTENT_CLASS}>
             <div className="space-y-2">
               <p className={DASHBOARD_CARD_TITLE_CLASS}>{card.title}</p>
-              <p className={DASHBOARD_CARD_DESCRIPTION_CLASS} style={DASHBOARD_CARD_DESCRIPTION_STYLE}>
+              <p className={DASHBOARD_CARD_DESCRIPTION_CLASS}>
                 {card.description}
               </p>
             </div>
@@ -408,10 +379,7 @@ function DashboardCardModal({ card, onClose }: DashboardCardModalProps) {
           <h2 className={DASHBOARD_MODAL_TITLE_CLASS}>{card.title}</h2>
 
           <div className="min-h-[140px] rounded-lg bg-[var(--ui-surface-muted)] p-4" style={{ border: SOFT_BORDER }}>
-            <div className="space-y-4">
-              <p className={DASHBOARD_MODAL_DETAILS_CLASS}>{card.description}</p>
-              {card.details ? <p className={DASHBOARD_MODAL_DETAILS_CLASS}>{card.details}</p> : null}
-            </div>
+            <p className={DASHBOARD_MODAL_DETAILS_CLASS}>{card.description}</p>
           </div>
 
           <div className="flex items-center justify-between gap-3">
