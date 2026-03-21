@@ -66,6 +66,11 @@ type DashboardCardGridProps = {
   onCardOpen: (card: DashboardCardItem) => void;
 };
 
+type DashboardCardProps = {
+  card: DashboardCardItem;
+  onOpen: (card: DashboardCardItem) => void;
+};
+
 type DashboardCardModalProps = {
   card: DashboardCardItem;
   onClose: () => void;
@@ -97,7 +102,7 @@ const DASHBOARD_CARD_ITEMS: DashboardCardItem[] = [
   {
     id: 1,
     title: "Website overview",
-    description: "This website was developed by AJ Development and tracks learning progress over time.",
+    description: "This website was developed by AJ and tracks learning progress over time.",
     dateTime: "13.03.2026 | 21:30",
   },
   {
@@ -144,6 +149,8 @@ const DASHBOARD_CARD_ITEMS: DashboardCardItem[] = [
 ];
 
 const MOBILE_BREAKPOINT = 1024;
+const DASHBOARD_CARD_PREVIEW_MAX_LENGTH = 60;
+const TRAILING_PUNCTUATION_PATTERN = /[.,;:!?]+$/;
 const ICON_SIZES = {
   small: 18,
   medium: 22,
@@ -204,12 +211,12 @@ const PROFILE_DROPDOWN_ACTION_CLASS =
 const DASHBOARD_GRID_BASE_CLASS =
   "custom-scrollbar grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto pb-4 pr-1 pt-4 sm:grid-cols-2 md:pt-6 lg:gap-5 lg:pb-0";
 const DASHBOARD_CARD_CLASS =
-  "min-h-[190px] overflow-hidden rounded-xl bg-[var(--ui-surface)] shadow-[0_1px_2px_rgba(31,31,31,0.03)] lg:min-h-[206px]";
-const DASHBOARD_CARD_CONTENT_CLASS = "grid h-full grid-rows-[auto,1fr,auto] gap-3 p-5 lg:p-6";
+  "flex min-h-[184px] overflow-hidden rounded-xl bg-[var(--ui-surface)] shadow-[0_1px_2px_rgba(31,31,31,0.03)] lg:min-h-[198px]";
+const DASHBOARD_CARD_CONTENT_CLASS = "flex min-h-full flex-1 flex-col gap-3 p-5 lg:p-6";
 const DASHBOARD_CARD_TITLE_CLASS =
   `ui-text-card-title font-semibold tracking-[0.01em] ${SURFACE_TEXT_CLASS}`;
 const DASHBOARD_CARD_DESCRIPTION_CLASS = `ui-text-body-sm max-w-[34ch] ${SURFACE_TEXT_CLASS}`;
-const DASHBOARD_CARD_FOOTER_CLASS = "flex items-center justify-between gap-3";
+const DASHBOARD_CARD_FOOTER_CLASS = "mt-auto flex items-center justify-between gap-3";
 const DASHBOARD_CARD_DATE_CLASS = `ui-text-meta font-medium leading-none ${MUTED_TEXT_CLASS}`;
 const DASHBOARD_CARD_BUTTON_CLASS =
   `ui-text-button shrink-0 cursor-pointer rounded-lg bg-[var(--ui-surface-muted)] px-3.5 py-2 font-medium leading-none ${SURFACE_TEXT_CLASS} outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 active:bg-[var(--ui-surface-muted)] hover:bg-[var(--ui-surface-muted)] lg:px-4`;
@@ -235,6 +242,25 @@ function formatServerTime(date: Date, timeZone: string) {
 
 function isDesktopViewport() {
   return window.innerWidth >= MOBILE_BREAKPOINT;
+}
+
+function trimTrailingPunctuation(value: string) {
+  return value.trim().replace(TRAILING_PUNCTUATION_PATTERN, "");
+}
+
+function getCardDescriptionPreview(text: string, maxLength: number = DASHBOARD_CARD_PREVIEW_MAX_LENGTH) {
+  const normalizedText = text.trim();
+
+  if (normalizedText.length <= maxLength) {
+    return `${trimTrailingPunctuation(normalizedText)}...`;
+  }
+
+  const slice = normalizedText.slice(0, maxLength + 1);
+  const lastWordBreak = slice.lastIndexOf(" ");
+  const preview = trimTrailingPunctuation(
+    lastWordBreak > 0 ? slice.slice(0, lastWordBreak) : normalizedText.slice(0, maxLength),
+  );
+  return `${preview}...`;
 }
 
 function useServerTime(initialServerTimeIso: string, serverTimeZone?: string) {
@@ -339,34 +365,38 @@ function ProfileMenu({ open }: { open: boolean }) {
   );
 }
 
+function DashboardCard({ card, onOpen }: DashboardCardProps) {
+  const descriptionPreview = getCardDescriptionPreview(card.description);
+
+  return (
+    <article className={DASHBOARD_CARD_CLASS} style={{ border: SOFT_BORDER }}>
+      <div className={DASHBOARD_CARD_CONTENT_CLASS}>
+        <div className="space-y-2">
+          <p className={DASHBOARD_CARD_TITLE_CLASS}>{card.title}</p>
+          <p className={DASHBOARD_CARD_DESCRIPTION_CLASS}>{descriptionPreview}</p>
+        </div>
+
+        <div className={DASHBOARD_CARD_FOOTER_CLASS}>
+          <p className={DASHBOARD_CARD_DATE_CLASS}>{card.dateTime}</p>
+          <button
+            type="button"
+            onClick={() => onOpen(card)}
+            className={DASHBOARD_CARD_BUTTON_CLASS}
+            style={{ border: SOFT_BORDER }}
+          >
+            Read more
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 function DashboardCardGrid({ cards, isDesktopSidebarCollapsed, onCardOpen }: DashboardCardGridProps) {
   return (
     <section className={cn(DASHBOARD_GRID_BASE_CLASS, isDesktopSidebarCollapsed ? "lg:grid-cols-3" : "lg:grid-cols-2")}>
       {cards.map((card) => (
-        <article key={card.id} className={DASHBOARD_CARD_CLASS} style={{ border: SOFT_BORDER }}>
-          <div className={DASHBOARD_CARD_CONTENT_CLASS}>
-            <div className="space-y-2">
-              <p className={DASHBOARD_CARD_TITLE_CLASS}>{card.title}</p>
-              <p className={DASHBOARD_CARD_DESCRIPTION_CLASS}>
-                {card.description}
-              </p>
-            </div>
-
-            <div />
-
-            <div className={DASHBOARD_CARD_FOOTER_CLASS}>
-              <p className={DASHBOARD_CARD_DATE_CLASS}>{card.dateTime}</p>
-              <button
-                type="button"
-                onClick={() => onCardOpen(card)}
-                className={DASHBOARD_CARD_BUTTON_CLASS}
-                style={{ border: SOFT_BORDER }}
-              >
-                Read more
-              </button>
-            </div>
-          </div>
-        </article>
+        <DashboardCard key={card.id} card={card} onOpen={onCardOpen} />
       ))}
     </section>
   );
