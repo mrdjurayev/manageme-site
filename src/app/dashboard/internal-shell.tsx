@@ -21,19 +21,13 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { signOutAction } from "@/lib/actions/auth";
+import { DASHBOARD_CARD_ITEMS, DashboardCardGrid, DashboardCardModal, type DashboardCardItem } from "@/components/dashboard";
 import { LessonScheduleCanvas, LessonScheduleToolbar } from "@/components/lesson-schedule";
 
 type MenuItem = {
   name: string;
   icon: LucideIcon;
   section: string | null;
-};
-
-type DashboardCardItem = {
-  id: number;
-  title: string;
-  description: string;
-  dateTime: string;
 };
 
 type DashboardShellProps = {
@@ -60,22 +54,6 @@ type SidebarProps = {
   onSelectMenu: (name: string) => void;
 };
 
-type DashboardCardGridProps = {
-  cards: DashboardCardItem[];
-  isDesktopSidebarCollapsed: boolean;
-  onCardOpen: (card: DashboardCardItem) => void;
-};
-
-type DashboardCardProps = {
-  card: DashboardCardItem;
-  onOpen: (card: DashboardCardItem) => void;
-};
-
-type DashboardCardModalProps = {
-  card: DashboardCardItem;
-  onClose: () => void;
-};
-
 const MENU_ITEMS: MenuItem[] = [
   { name: "Dashboard", icon: LayoutDashboard, section: null },
   { name: "My Subjects", icon: BookOpenText, section: "STUDENT" },
@@ -98,59 +76,8 @@ const NOTIFICATION_PREVIEW = {
   subtitle: "title of day left",
   meta: "last period of deadline",
 };
-const DASHBOARD_CARD_ITEMS: DashboardCardItem[] = [
-  {
-    id: 1,
-    title: "Website overview",
-    description: "This website was developed by AJ and tracks learning progress over time.",
-    dateTime: "13.03.2026 | 21:30",
-  },
-  {
-    id: 2,
-    title: "Assignment review",
-    description:
-      "Assignments uploaded to the system are reviewed automatically or with AI support, and the results are highly accurate.",
-    dateTime: "13.03.2026 | 21:10",
-  },
-  {
-    id: 3,
-    title: "Semester structure",
-    description:
-      "The system has four semesters each year. During these semesters, students study, complete practical training, and take final exams.",
-    dateTime: "13.03.2026 | 20:50",
-  },
-  {
-    id: 4,
-    title: "Attendance rules",
-    description:
-      "Students must familiarize themselves with the system's attendance rules and the terms of the contract.",
-    dateTime: "13.03.2026 | 21:05",
-  },
-  {
-    id: 5,
-    title: "Assignments",
-    description: "Students must complete assignments on time and upload them to the system.",
-    dateTime: "13.03.2026 | 21:20",
-  },
-  {
-    id: 6,
-    title: "Assessment criteria",
-    description:
-      "Students are evaluated based on their activity during the season and the results of their assigned tasks.",
-    dateTime: "13.03.2026 | 21:35",
-  },
-  {
-    id: 7,
-    title: "Contract terms",
-    description:
-      "The terms of the contract are established between the system and the student, and compliance with them is mandatory.",
-    dateTime: "13.03.2026 | 21:40",
-  },
-];
 
 const MOBILE_BREAKPOINT = 1024;
-const DASHBOARD_CARD_PREVIEW_MAX_LENGTH = 60;
-const TRAILING_PUNCTUATION_PATTERN = /[.,;:!?]+$/;
 const ICON_SIZES = {
   small: 18,
   medium: 22,
@@ -208,27 +135,6 @@ const NOTIFICATION_DROPDOWN_CLASS =
   `custom-scrollbar touch-scroll fixed left-1/2 top-[85px] z-50 max-h-[min(22rem,calc(100dvh-6rem))] w-[min(17.5rem,calc(100vw-1.5rem))] -translate-x-1/2 overflow-y-auto overscroll-y-contain rounded-md bg-[var(--ui-surface)] touch-pan-y md:absolute md:left-auto md:right-[-10px] md:top-full md:max-h-[26rem] md:w-[320px] md:translate-x-0`;
 const PROFILE_DROPDOWN_ACTION_CLASS =
   `ui-text-body-sm flex w-full touch-manipulation cursor-pointer items-center gap-3 px-4 py-2.5 text-left ${SURFACE_TEXT_CLASS}`;
-const DASHBOARD_GRID_BASE_CLASS =
-  "custom-scrollbar grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto pb-4 pr-1 pt-4 sm:grid-cols-2 md:pt-6 lg:gap-5 lg:pb-0";
-const DASHBOARD_CARD_CLASS =
-  "flex min-h-[184px] overflow-hidden rounded-xl bg-[var(--ui-surface)] shadow-[0_1px_2px_rgba(31,31,31,0.03)] lg:min-h-[198px]";
-const DASHBOARD_CARD_CONTENT_CLASS = "flex min-h-full flex-1 flex-col gap-3 p-5 lg:p-6";
-const DASHBOARD_CARD_TITLE_CLASS =
-  `ui-text-card-title font-semibold tracking-[0.01em] ${SURFACE_TEXT_CLASS}`;
-const DASHBOARD_CARD_DESCRIPTION_CLASS = `ui-text-body-sm max-w-[34ch] ${SURFACE_TEXT_CLASS}`;
-const DASHBOARD_CARD_FOOTER_CLASS = "mt-auto flex items-center justify-between gap-3";
-const DASHBOARD_CARD_DATE_CLASS = `ui-text-meta font-medium leading-none ${MUTED_TEXT_CLASS}`;
-const DASHBOARD_CARD_BUTTON_CLASS =
-  `ui-text-button shrink-0 cursor-pointer rounded-lg bg-[var(--ui-surface-muted)] px-3.5 py-2 font-medium leading-none ${SURFACE_TEXT_CLASS} outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 active:bg-[var(--ui-surface-muted)] hover:bg-[var(--ui-surface-muted)] lg:px-4`;
-const DASHBOARD_MODAL_OVERLAY_CLASS =
-  "fixed inset-0 z-[60] flex items-center justify-center bg-[var(--ui-overlay)] px-3 py-4";
-const DASHBOARD_MODAL_PANEL_CLASS =
-  "custom-scrollbar w-[min(34rem,calc(100vw-1.5rem))] max-h-[min(34rem,calc(100dvh-2rem))] overflow-y-auto rounded-xl bg-[var(--ui-surface)] p-5 sm:p-6";
-const DASHBOARD_MODAL_TITLE_CLASS = `ui-text-dialog-title font-semibold ${SURFACE_TEXT_CLASS}`;
-const DASHBOARD_MODAL_DETAILS_CLASS = `ui-text-dialog-reading ${SURFACE_TEXT_CLASS}`;
-const DASHBOARD_MODAL_DATE_CLASS = `ui-text-meta font-medium ${MUTED_TEXT_CLASS}`;
-const DASHBOARD_MODAL_CLOSE_BUTTON_CLASS =
-  "ui-text-button h-10 shrink-0 cursor-pointer rounded-lg px-4 font-medium text-[var(--ui-text-inverse)] outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0 active:bg-[var(--ui-primary)] hover:bg-[var(--ui-primary)]";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -242,25 +148,6 @@ function formatServerTime(date: Date, timeZone: string) {
 
 function isDesktopViewport() {
   return window.innerWidth >= MOBILE_BREAKPOINT;
-}
-
-function trimTrailingPunctuation(value: string) {
-  return value.trim().replace(TRAILING_PUNCTUATION_PATTERN, "");
-}
-
-function getCardDescriptionPreview(text: string, maxLength: number = DASHBOARD_CARD_PREVIEW_MAX_LENGTH) {
-  const normalizedText = text.trim();
-
-  if (normalizedText.length <= maxLength) {
-    return `${trimTrailingPunctuation(normalizedText)}...`;
-  }
-
-  const slice = normalizedText.slice(0, maxLength + 1);
-  const lastWordBreak = slice.lastIndexOf(" ");
-  const preview = trimTrailingPunctuation(
-    lastWordBreak > 0 ? slice.slice(0, lastWordBreak) : normalizedText.slice(0, maxLength),
-  );
-  return `${preview}...`;
 }
 
 function useServerTime(initialServerTimeIso: string, serverTimeZone?: string) {
@@ -360,71 +247,6 @@ function ProfileMenu({ open }: { open: boolean }) {
             Logout
           </button>
         </form>
-      </div>
-    </div>
-  );
-}
-
-function DashboardCard({ card, onOpen }: DashboardCardProps) {
-  const descriptionPreview = getCardDescriptionPreview(card.description);
-
-  return (
-    <article className={DASHBOARD_CARD_CLASS} style={{ border: SOFT_BORDER }}>
-      <div className={DASHBOARD_CARD_CONTENT_CLASS}>
-        <div className="space-y-2">
-          <p className={DASHBOARD_CARD_TITLE_CLASS}>{card.title}</p>
-          <p className={DASHBOARD_CARD_DESCRIPTION_CLASS}>{descriptionPreview}</p>
-        </div>
-
-        <div className={DASHBOARD_CARD_FOOTER_CLASS}>
-          <p className={DASHBOARD_CARD_DATE_CLASS}>{card.dateTime}</p>
-          <button
-            type="button"
-            onClick={() => onOpen(card)}
-            className={DASHBOARD_CARD_BUTTON_CLASS}
-            style={{ border: SOFT_BORDER }}
-          >
-            Read more
-          </button>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function DashboardCardGrid({ cards, isDesktopSidebarCollapsed, onCardOpen }: DashboardCardGridProps) {
-  return (
-    <section className={cn(DASHBOARD_GRID_BASE_CLASS, isDesktopSidebarCollapsed ? "lg:grid-cols-3" : "lg:grid-cols-2")}>
-      {cards.map((card) => (
-        <DashboardCard key={card.id} card={card} onOpen={onCardOpen} />
-      ))}
-    </section>
-  );
-}
-
-function DashboardCardModal({ card, onClose }: DashboardCardModalProps) {
-  return (
-    <div className={DASHBOARD_MODAL_OVERLAY_CLASS} onClick={onClose}>
-      <div className={DASHBOARD_MODAL_PANEL_CLASS} style={{ border: SOFT_BORDER }} onClick={(event) => event.stopPropagation()}>
-        <div className="space-y-4">
-          <h2 className={DASHBOARD_MODAL_TITLE_CLASS}>{card.title}</h2>
-
-          <div className="min-h-[140px] rounded-lg bg-[var(--ui-surface-muted)] p-4" style={{ border: SOFT_BORDER }}>
-            <p className={DASHBOARD_MODAL_DETAILS_CLASS}>{card.description}</p>
-          </div>
-
-          <div className="flex items-center justify-between gap-3">
-            <p className={DASHBOARD_MODAL_DATE_CLASS}>{card.dateTime}</p>
-            <button
-              type="button"
-              onClick={onClose}
-              className={DASHBOARD_MODAL_CLOSE_BUTTON_CLASS}
-              style={{ border: SOFT_BORDER, backgroundColor: "var(--ui-primary)" }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
