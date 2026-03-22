@@ -6,16 +6,26 @@ type DashboardCardGridProps = {
   cards: DashboardCardItem[];
   isDesktopSidebarCollapsed: boolean;
   onCardOpen: (card: DashboardCardItem) => void;
+  onCardNavigate?: (card: DashboardCardItem) => void;
 };
 
 type DashboardCardModalProps = {
   card: DashboardCardItem;
   onClose: () => void;
+  onLinkClick?: (card: DashboardCardItem) => void;
 };
 
 type DashboardCardProps = {
   card: DashboardCardItem;
   onOpen: (card: DashboardCardItem) => void;
+  onNavigate?: (card: DashboardCardItem) => void;
+};
+
+type DashboardCardDetailsContentProps = {
+  card: DashboardCardItem;
+  className?: string;
+  showLink?: boolean;
+  onLinkClick?: (card: DashboardCardItem) => void;
 };
 
 const DASHBOARD_CARD_PREVIEW_MAX_LENGTH = 60;
@@ -92,8 +102,16 @@ function renderHighlightedDescription(text: string, highlight?: string): ReactNo
   );
 }
 
-function DashboardCard({ card, onOpen }: DashboardCardProps) {
+function DashboardCard({ card, onOpen, onNavigate }: DashboardCardProps) {
   const descriptionPreview = getCardDescriptionPreview(card.description);
+  const handleReadMoreClick = () => {
+    if (card.modalLinkTarget && onNavigate) {
+      onNavigate(card);
+      return;
+    }
+
+    onOpen(card);
+  };
 
   return (
     <article className={DASHBOARD_CARD_CLASS} style={{ border: SOFT_BORDER }}>
@@ -107,7 +125,7 @@ function DashboardCard({ card, onOpen }: DashboardCardProps) {
           <p className={DASHBOARD_CARD_DATE_CLASS}>{card.dateTime}</p>
           <button
             type="button"
-            onClick={() => onOpen(card)}
+            onClick={handleReadMoreClick}
             className={DASHBOARD_CARD_BUTTON_CLASS}
             style={{ border: SOFT_BORDER }}
           >
@@ -119,17 +137,60 @@ function DashboardCard({ card, onOpen }: DashboardCardProps) {
   );
 }
 
-export function DashboardCardGrid({ cards, isDesktopSidebarCollapsed, onCardOpen }: DashboardCardGridProps) {
+export function DashboardCardGrid({ cards, isDesktopSidebarCollapsed, onCardOpen, onCardNavigate }: DashboardCardGridProps) {
   return (
     <section className={cn(DASHBOARD_GRID_BASE_CLASS, isDesktopSidebarCollapsed ? "lg:grid-cols-3" : "lg:grid-cols-2")}>
       {cards.map((card) => (
-        <DashboardCard key={card.id} card={card} onOpen={onCardOpen} />
+        <DashboardCard key={card.id} card={card} onOpen={onCardOpen} onNavigate={onCardNavigate} />
       ))}
     </section>
   );
 }
 
-export function DashboardCardModal({ card, onClose }: DashboardCardModalProps) {
+export function DashboardCardDetailsContent({
+  card,
+  className,
+  showLink = true,
+  onLinkClick,
+}: DashboardCardDetailsContentProps) {
+  const linkContent = card.modalLinkLabel ? (
+    onLinkClick ? (
+      <button
+        type="button"
+        onClick={() => onLinkClick(card)}
+        className="ui-text-body-sm inline-flex w-fit cursor-pointer font-medium text-[var(--ui-primary)] underline underline-offset-2"
+      >
+        {card.modalLinkLabel}
+      </button>
+    ) : (
+      <span className="ui-text-body-sm inline-flex w-fit cursor-pointer font-medium text-[var(--ui-primary)] underline underline-offset-2">
+        {card.modalLinkLabel}
+      </span>
+    )
+  ) : null;
+
+  return (
+    <div className={cn("space-y-3", className)}>
+      <p className={DASHBOARD_MODAL_DETAILS_CLASS}>{card.description}</p>
+      {card.modalIntro ? <p className={DASHBOARD_MODAL_DETAILS_CLASS}>{card.modalIntro}</p> : null}
+      {card.modalDescription ? (
+        <p className={DASHBOARD_MODAL_DETAILS_CLASS}>
+          {renderHighlightedDescription(card.modalDescription, card.modalDescriptionHighlight)}
+        </p>
+      ) : null}
+      {card.modalListItems?.length ? (
+        <ul className={DASHBOARD_MODAL_LIST_CLASS}>
+          {card.modalListItems.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      ) : null}
+      {showLink ? linkContent : null}
+    </div>
+  );
+}
+
+export function DashboardCardModal({ card, onClose, onLinkClick }: DashboardCardModalProps) {
   return (
     <div className={DASHBOARD_MODAL_OVERLAY_CLASS} onClick={onClose}>
       <div className={DASHBOARD_MODAL_PANEL_CLASS} style={{ border: SOFT_BORDER }} onClick={(event) => event.stopPropagation()}>
@@ -137,22 +198,7 @@ export function DashboardCardModal({ card, onClose }: DashboardCardModalProps) {
           <h2 className={DASHBOARD_MODAL_TITLE_CLASS}>{card.title}</h2>
 
           <div className="min-h-[140px] rounded-lg bg-[var(--ui-surface-muted)] p-4" style={{ border: SOFT_BORDER }}>
-            <div className="space-y-3">
-              <p className={DASHBOARD_MODAL_DETAILS_CLASS}>{card.description}</p>
-              {card.modalIntro ? <p className={DASHBOARD_MODAL_DETAILS_CLASS}>{card.modalIntro}</p> : null}
-              {card.modalDescription ? (
-                <p className={DASHBOARD_MODAL_DETAILS_CLASS}>
-                  {renderHighlightedDescription(card.modalDescription, card.modalDescriptionHighlight)}
-                </p>
-              ) : null}
-              {card.modalListItems?.length ? (
-                <ul className={DASHBOARD_MODAL_LIST_CLASS}>
-                  {card.modalListItems.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
+            <DashboardCardDetailsContent card={card} onLinkClick={onLinkClick} />
           </div>
 
           <div className="flex items-center justify-between gap-3">

@@ -21,8 +21,16 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { signOutAction } from "@/lib/actions/auth";
-import { DASHBOARD_CARD_ITEMS, DashboardCardGrid, DashboardCardModal, type DashboardCardItem } from "@/components/dashboard";
+import {
+  CONTRACT_TERMS_CARD,
+  ContractTermsView,
+  DASHBOARD_CARD_ITEMS,
+  DashboardCardGrid,
+  DashboardCardModal,
+  type DashboardCardItem,
+} from "@/components/dashboard";
 import { LessonScheduleCanvas, LessonScheduleToolbar } from "@/components/lesson-schedule";
+import { MySubjectsView } from "@/components/my-subjects";
 
 type MenuItem = {
   name: string;
@@ -34,6 +42,8 @@ type DashboardShellProps = {
   initialServerTimeIso: string;
   serverTimeZone?: string;
 };
+
+type DashboardContentView = "cards" | "contract-terms";
 
 type AppHeaderProps = {
   currentTime: string;
@@ -386,6 +396,7 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("Dashboard");
+  const [dashboardContentView, setDashboardContentView] = useState<DashboardContentView>("cards");
   const [selectedCard, setSelectedCard] = useState<DashboardCardItem | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
@@ -472,6 +483,7 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
 
   const handleMenuSelect = useCallback((name: string) => {
     setActiveMenu(name);
+    setDashboardContentView("cards");
     setSelectedCard(null);
     closeMobileSidebar();
     closeTopbarMenus();
@@ -480,6 +492,18 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
   const handleBrandClick = useCallback(() => {
     handleMenuSelect("Dashboard");
   }, [handleMenuSelect]);
+
+  const handleCardLinkClick = useCallback((card: DashboardCardItem) => {
+    if (card.modalLinkTarget !== "contract-terms") {
+      return;
+    }
+
+    setActiveMenu("Dashboard");
+    setDashboardContentView("contract-terms");
+    setSelectedCard(null);
+    closeMobileSidebar();
+    closeTopbarMenus();
+  }, [closeMobileSidebar, closeTopbarMenus]);
 
   return (
     <div className={APP_SHELL_CLASS}>
@@ -505,13 +529,20 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
           onSelectMenu={handleMenuSelect}
         />
         <main className={MAIN_CLASS}>
-          {activeMenu === "Dashboard" ? (
+          {activeMenu === "Dashboard" && dashboardContentView === "cards" ? (
             <DashboardCardGrid
               cards={DASHBOARD_CARD_ITEMS}
               isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
               onCardOpen={setSelectedCard}
+              onCardNavigate={handleCardLinkClick}
             />
           ) : null}
+
+          {activeMenu === "Dashboard" && dashboardContentView === "contract-terms" ? (
+            <ContractTermsView card={CONTRACT_TERMS_CARD} />
+          ) : null}
+
+          {activeMenu === "My Subjects" ? <MySubjectsView /> : null}
 
           {activeMenu === "Lesson Schedule" ? (
             <div className="min-h-0 flex flex-1 flex-col gap-0 pb-4 pt-0 lg:pb-0">
@@ -522,7 +553,13 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
         </main>
       </div>
 
-      {selectedCard ? <DashboardCardModal card={selectedCard} onClose={() => setSelectedCard(null)} /> : null}
+      {selectedCard ? (
+        <DashboardCardModal
+          card={selectedCard}
+          onClose={() => setSelectedCard(null)}
+          onLinkClick={handleCardLinkClick}
+        />
+      ) : null}
     </div>
   );
 }

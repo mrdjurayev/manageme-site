@@ -73,7 +73,7 @@ export function SeasonDropdown() {
     <div ref={dropdownRef} className="relative my-auto flex min-w-[152px] items-center">
       <button
         type="button"
-        aria-label="Select season"
+        aria-label="Select semester"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
@@ -90,7 +90,7 @@ export function SeasonDropdown() {
 
       {isOpen ? (
         <div className={DROPDOWN_PANEL_CLASS} style={{ border: SOFT_BORDER }}>
-          <div role="listbox" aria-label="Season options">
+          <div role="listbox" aria-label="Semester options">
             {SEASON_OPTIONS.map((season) => (
               <SeasonOptionButton
                 key={season}

@@ -1,3 +1,5 @@
+export type DashboardCardLinkTarget = "contract-terms";
+
 export type DashboardCardItem = {
   id: number;
   title: string;
@@ -6,7 +8,34 @@ export type DashboardCardItem = {
   modalDescription?: string;
   modalDescriptionHighlight?: string;
   modalListItems?: string[];
+  modalLinkLabel?: string;
+  modalLinkTarget?: DashboardCardLinkTarget;
   dateTime: string;
+};
+
+export const CONTRACT_TERMS_CARD: DashboardCardItem = {
+  id: 7,
+  title: "Contract terms",
+  description:
+    "The terms of the contract are established between the system and the student, and compliance with them is mandatory.",
+  modalIntro:
+    "This agreement is established between ManageMe and the student in order to prevent potential misunderstandings and issues. According to this agreement, the student is required to strictly fulfill their responsibilities.",
+  modalListItems: [
+    "The student will be taught subjects assigned for the specific academic term",
+    "Each subject has a defined tuition fee",
+    "The maximum score that can be obtained for each subject is 50 points",
+    "The maximum score for the final exam is 50 points",
+    "A minimum of 40 points is required to be eligible for the final exam",
+    "If the student’s score is below 40, they will not be allowed to take the final exam and must retake the subject",
+    "To pass the final exam, the student must score at least 35 points",
+    "If the student scores below 35 on the final exam, they will be required to retake the subject",
+    "The student must not miss classes without a valid reason",
+    "If a student misses more than 3 classes in a subject during the term, they will be required to retake that subject",
+    "If a student is more than 10 minutes late to a class, they will be marked as absent automatically",
+  ],
+  modalLinkLabel: "Read more",
+  modalLinkTarget: "contract-terms",
+  dateTime: "13.03.2026 | 21:40",
 };
 
 export const DASHBOARD_CARD_ITEMS: DashboardCardItem[] = [
@@ -63,26 +92,5 @@ export const DASHBOARD_CARD_ITEMS: DashboardCardItem[] = [
       "As mentioned above, the student earns certain points for the assignments given and for participation in class. To take the final exam, the student is required to accumulate enough points. Points and results are recorded at the end of the season and updated in the new season.",
     dateTime: "13.03.2026 | 21:35",
   },
-  {
-    id: 7,
-    title: "Contract terms",
-    description:
-      "The terms of the contract are established between the system and the student, and compliance with them is mandatory.",
-    modalIntro:
-      "This agreement is established between ManageMe and the student in order to prevent potential misunderstandings and issues. According to this agreement, the student is required to strictly fulfill their responsibilities.",
-    modalListItems: [
-      "The student will be taught subjects assigned for the specific academic term",
-      "Each subject has a defined tuition fee",
-      "The maximum score that can be obtained for each subject is 50 points",
-      "The maximum score for the final exam is 50 points",
-      "A minimum of 40 points is required to be eligible for the final exam",
-      "If the student’s score is below 40, they will not be allowed to take the final exam and must retake the subject",
-      "To pass the final exam, the student must score at least 35 points",
-      "If the student scores below 35 on the final exam, they will be required to retake the subject",
-      "The student must not miss classes without a valid reason",
-      "If a student misses more than 3 classes in a subject during the term, they will be required to retake that subject",
-      "If a student is more than 10 minutes late to a class, they will be marked as absent automatically",
-    ],
-    dateTime: "13.03.2026 | 21:40",
-  },
+  CONTRACT_TERMS_CARD,
 ];

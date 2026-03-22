@@ -10,7 +10,7 @@ export const DAYS = [
   { key: "SUN", label: "SUN" },
 ] as const;
 
-export const SEASON_OPTIONS = ["Season 1", "Season 2", "Season 3", "Season 4"] as const;
+export const SEASON_OPTIONS = ["Semester 1", "Semester 2", "Semester 3", "Semester 4"] as const;
 export type SeasonOption = (typeof SEASON_OPTIONS)[number];
 
 export const HOURS = Array.from({ length: 24 }, (_, hour) => hour);

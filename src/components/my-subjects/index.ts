@@ -1,0 +1,1 @@
+export { MySubjectsView } from "./view";
