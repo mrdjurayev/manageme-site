@@ -2,7 +2,6 @@ import type { MySubjectItem } from "./model";
 import { MySubjectsTableRow } from "./subject-row";
 import {
   MY_SUBJECTS_COLUMNS,
-  MY_SUBJECTS_COLUMN_CELL_CLASSNAMES,
   MY_SUBJECTS_HEADER_BORDER,
   MY_SUBJECTS_TABLE_CLASS,
   MY_SUBJECTS_TABLE_WRAPPER_CLASS,
@@ -24,7 +23,7 @@ export function MySubjectsTable({ subjects }: MySubjectsTableProps) {
         <thead>
           <tr style={{ borderBottom: MY_SUBJECTS_HEADER_BORDER }}>
             {MY_SUBJECTS_COLUMNS.map((column) => (
-              <th key={column.key} className={MY_SUBJECTS_COLUMN_CELL_CLASSNAMES[column.key].header} scope="col">
+              <th key={column.key} className={column.headerClassName} scope="col">
                 {column.label ? <span>{column.label}</span> : null}
               </th>
             ))}

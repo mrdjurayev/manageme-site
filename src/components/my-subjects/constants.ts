@@ -4,6 +4,8 @@ export type MySubjectsColumn = {
   key: MySubjectsColumnKey;
   label: string;
   width: string;
+  headerClassName: string;
+  bodyClassName: string;
 };
 
 export const MY_SUBJECTS_SOFT_BORDER = "0.5px solid var(--ui-divider-soft)";
@@ -14,29 +16,6 @@ export const MY_SUBJECTS_TABLE_CLASS = "min-w-[720px] w-full table-fixed border-
 const MY_SUBJECTS_CENTERED_HEADER_CELL_CLASS =
   "ui-text-form-label px-3 py-4 text-center font-semibold text-[var(--ui-text-primary)] md:px-4";
 const MY_SUBJECTS_CENTERED_BODY_CELL_CLASS = "px-3 py-5 align-middle md:px-4";
-
-export const MY_SUBJECTS_COLUMN_CELL_CLASSNAMES: Record<MySubjectsColumnKey, { header: string; body: string }> = {
-  subject: {
-    header: MY_SUBJECTS_CENTERED_HEADER_CELL_CLASS,
-    body: MY_SUBJECTS_CENTERED_BODY_CELL_CLASS,
-  },
-  teacher: {
-    header: MY_SUBJECTS_CENTERED_HEADER_CELL_CLASS,
-    body: MY_SUBJECTS_CENTERED_BODY_CELL_CLASS,
-  },
-  attendance: {
-    header: MY_SUBJECTS_CENTERED_HEADER_CELL_CLASS,
-    body: MY_SUBJECTS_CENTERED_BODY_CELL_CLASS,
-  },
-  action: {
-    header: MY_SUBJECTS_CENTERED_HEADER_CELL_CLASS,
-    body: MY_SUBJECTS_CENTERED_BODY_CELL_CLASS,
-  },
-  plan: {
-    header: MY_SUBJECTS_CENTERED_HEADER_CELL_CLASS,
-    body: MY_SUBJECTS_CENTERED_BODY_CELL_CLASS,
-  },
-};
 
 export const MY_SUBJECTS_SUBJECT_CELL_CLASS = "ui-text-dialog-body text-center text-[var(--ui-text-primary)]";
 export const MY_SUBJECTS_TEACHER_LIST_CLASS = "flex flex-col items-center gap-4 text-center";
@@ -55,13 +34,27 @@ export const MY_SUBJECTS_PLAN_ACTIONS_CLASS = "flex justify-center gap-2.5";
 export const MY_SUBJECTS_ICON_STROKE_WIDTH = 2;
 export const MY_SUBJECTS_ICON_SIZE = 18;
 
+function createColumn(key: MySubjectsColumnKey, label: string, width: string): MySubjectsColumn {
+  return {
+    key,
+    label,
+    width,
+    headerClassName: MY_SUBJECTS_CENTERED_HEADER_CELL_CLASS,
+    bodyClassName: MY_SUBJECTS_CENTERED_BODY_CELL_CLASS,
+  };
+}
+
 export const MY_SUBJECTS_COLUMNS: MySubjectsColumn[] = [
-  { key: "subject", label: "Subject", width: "31%" },
-  { key: "teacher", label: "Teacher", width: "25%" },
-  { key: "attendance", label: "Attendance", width: "12%" },
-  { key: "action", label: "Actions", width: "24%" },
-  { key: "plan", label: "Plan", width: "8%" },
+  createColumn("subject", "Subject", "20%"),
+  createColumn("teacher", "Teacher", "20%"),
+  createColumn("attendance", "Attendance", "20%"),
+  createColumn("action", "Actions", "20%"),
+  createColumn("plan", "Plan", "20%"),
 ];
+
+export const MY_SUBJECTS_COLUMNS_BY_KEY = Object.fromEntries(
+  MY_SUBJECTS_COLUMNS.map((column) => [column.key, column]),
+) as Record<MySubjectsColumnKey, MySubjectsColumn>;
 
 export const MY_SUBJECTS_VIEW_CLASS = "min-h-0 flex flex-1 flex-col gap-0 pb-4 pt-0 lg:pb-0";
 export const MY_SUBJECTS_SURFACE_CLASS = "min-h-0 flex-1 overflow-hidden rounded-xl bg-[var(--ui-surface)]";

@@ -4,7 +4,7 @@ import { CalendarDays, ClipboardList, Download } from "lucide-react";
 import type { MySubjectItem, MySubjectTeacher } from "./model";
 import {
   MY_SUBJECTS_ATTENDANCE_BUTTON_CLASS,
-  MY_SUBJECTS_COLUMN_CELL_CLASSNAMES,
+  MY_SUBJECTS_COLUMNS_BY_KEY,
   MY_SUBJECTS_ICON_BUTTON_CLASS,
   MY_SUBJECTS_ICON_SIZE,
   MY_SUBJECTS_ICON_STROKE_WIDTH,
@@ -41,11 +41,11 @@ function ActionButton({ children, className }: { children: ReactNode; className:
   );
 }
 
-const SUBJECT_BODY_CELL_CLASS = MY_SUBJECTS_COLUMN_CELL_CLASSNAMES.subject.body;
-const TEACHER_BODY_CELL_CLASS = MY_SUBJECTS_COLUMN_CELL_CLASSNAMES.teacher.body;
-const ATTENDANCE_BODY_CELL_CLASS = MY_SUBJECTS_COLUMN_CELL_CLASSNAMES.attendance.body;
-const ACTION_BODY_CELL_CLASS = MY_SUBJECTS_COLUMN_CELL_CLASSNAMES.action.body;
-const PLAN_BODY_CELL_CLASS = MY_SUBJECTS_COLUMN_CELL_CLASSNAMES.plan.body;
+const SUBJECT_BODY_CELL_CLASS = MY_SUBJECTS_COLUMNS_BY_KEY.subject.bodyClassName;
+const TEACHER_BODY_CELL_CLASS = MY_SUBJECTS_COLUMNS_BY_KEY.teacher.bodyClassName;
+const ATTENDANCE_BODY_CELL_CLASS = MY_SUBJECTS_COLUMNS_BY_KEY.attendance.bodyClassName;
+const ACTION_BODY_CELL_CLASS = MY_SUBJECTS_COLUMNS_BY_KEY.action.bodyClassName;
+const PLAN_BODY_CELL_CLASS = MY_SUBJECTS_COLUMNS_BY_KEY.plan.bodyClassName;
 
 export function MySubjectsTableRow({ subject }: { subject: MySubjectItem }) {
   return (

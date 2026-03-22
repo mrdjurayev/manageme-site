@@ -8,7 +8,7 @@ const CURRENT_CLASS_BUTTON_CLASS =
 
 export function MySubjectsToolbarActions() {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 md:gap-3">
       <button
         type="button"
         aria-label="Current class"
@@ -18,7 +18,9 @@ export function MySubjectsToolbarActions() {
         <Radio size={18} strokeWidth={2} />
         <span>Current class</span>
       </button>
-      <SeasonDropdown />
+      <div className="-ml-1 md:ml-0">
+        <SeasonDropdown />
+      </div>
     </div>
   );
 }
