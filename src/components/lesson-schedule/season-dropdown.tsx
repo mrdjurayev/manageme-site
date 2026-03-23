@@ -3,29 +3,33 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 
-import { SEASON_OPTIONS, SOFT_BORDER, cn, type SeasonOption } from "./shared";
+import { SEASON_OPTIONS, SOFT_BORDER, cn } from "./shared";
 
 const DROPDOWN_TRIGGER_CLASS =
-  "ui-text-body-sm flex h-10 w-full items-center justify-between gap-3 overflow-hidden rounded-xl bg-[var(--ui-surface)] px-3 font-medium text-[var(--ui-text-primary)] outline-none transition-transform focus:outline-none focus-visible:outline-none focus-visible:ring-0";
+  "ui-text-body-sm flex h-10 w-full items-center justify-between gap-2 overflow-hidden rounded-xl bg-[var(--ui-surface)] px-2.5 font-medium text-[var(--ui-text-primary)] outline-none transition-transform focus:outline-none focus-visible:outline-none focus-visible:ring-0 sm:gap-3 sm:px-3";
 const DROPDOWN_PANEL_CLASS =
   "absolute right-0 top-[calc(100%+8px)] z-20 min-w-full overflow-hidden rounded-xl bg-[var(--ui-surface)] py-2";
 const DROPDOWN_OPTION_CLASS =
   "ui-text-body-sm flex w-full items-center gap-3 px-4 py-2.5 text-left font-medium text-[var(--ui-text-primary)] outline-none transition-colors hover:bg-[#fafafa] focus:bg-[#fafafa] active:bg-[#fafafa] focus:outline-none";
+const DROPDOWN_OPTION_DISABLED_CLASS =
+  "ui-text-body-sm flex w-full items-center gap-3 px-4 py-2.5 text-left font-medium text-[var(--ui-text-secondary)] opacity-50";
 
 type SeasonOptionButtonProps = {
+  isDisabled: boolean;
   isSelected: boolean;
   onSelect: () => void;
-  season: SeasonOption;
+  season: string;
 };
 
-function SeasonOptionButton({ isSelected, onSelect, season }: SeasonOptionButtonProps) {
+function SeasonOptionButton({ isDisabled, isSelected, onSelect, season }: SeasonOptionButtonProps) {
   return (
     <button
       type="button"
       role="option"
+      aria-disabled={isDisabled}
       aria-selected={isSelected}
-      onClick={onSelect}
-      className={DROPDOWN_OPTION_CLASS}
+      onClick={isDisabled ? undefined : onSelect}
+      className={isDisabled ? DROPDOWN_OPTION_DISABLED_CLASS : DROPDOWN_OPTION_CLASS}
     >
       <span className="flex h-5 w-5 shrink-0 items-center justify-center">
         {isSelected ? <Check size={18} strokeWidth={2.5} /> : null}
@@ -35,10 +39,29 @@ function SeasonOptionButton({ isSelected, onSelect, season }: SeasonOptionButton
   );
 }
 
-export function SeasonDropdown() {
+type SeasonDropdownProps = {
+  options?: readonly string[];
+  defaultValue?: string;
+  value?: string;
+  ariaLabel?: string;
+  disabledOptions?: readonly string[];
+  minWidthClassName?: string;
+  onChange?: (value: string) => void;
+};
+
+export function SeasonDropdown({
+  options = SEASON_OPTIONS,
+  defaultValue = SEASON_OPTIONS[0],
+  value,
+  ariaLabel = "Select semester",
+  disabledOptions = [],
+  minWidthClassName = "min-w-[132px] sm:min-w-[152px]",
+  onChange,
+}: SeasonDropdownProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedSeason, setSelectedSeason] = useState<SeasonOption>(SEASON_OPTIONS[0]);
+  const [selectedSeason, setSelectedSeason] = useState<string>(value ?? defaultValue);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const resolvedSelectedSeason = value ?? selectedSeason;
 
   useEffect(() => {
     if (!isOpen) {
@@ -70,17 +93,17 @@ export function SeasonDropdown() {
   }, [isOpen]);
 
   return (
-    <div ref={dropdownRef} className="relative my-auto flex min-w-[152px] items-center">
+    <div ref={dropdownRef} className={cn("relative my-auto flex items-center", minWidthClassName)}>
       <button
         type="button"
-        aria-label="Select semester"
+        aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
         className={DROPDOWN_TRIGGER_CLASS}
         style={{ border: SOFT_BORDER }}
       >
-        <span className="truncate">{selectedSeason}</span>
+        <span className="truncate">{resolvedSelectedSeason}</span>
         <ChevronDown
           size={16}
           strokeWidth={2}
@@ -90,14 +113,18 @@ export function SeasonDropdown() {
 
       {isOpen ? (
         <div className={DROPDOWN_PANEL_CLASS} style={{ border: SOFT_BORDER }}>
-          <div role="listbox" aria-label="Semester options">
-            {SEASON_OPTIONS.map((season) => (
+          <div role="listbox" aria-label={ariaLabel}>
+            {options.map((season) => (
               <SeasonOptionButton
                 key={season}
                 season={season}
-                isSelected={selectedSeason === season}
+                isDisabled={disabledOptions.includes(season)}
+                isSelected={resolvedSelectedSeason === season}
                 onSelect={() => {
-                  setSelectedSeason(season);
+                  if (value === undefined) {
+                    setSelectedSeason(season);
+                  }
+                  onChange?.(season);
                   setIsOpen(false);
                 }}
               />

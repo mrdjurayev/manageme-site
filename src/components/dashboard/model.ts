@@ -31,6 +31,7 @@ export const CONTRACT_TERMS_CARD: DashboardCardItem = {
     "If the student scores below 35 on the final exam, they will be required to retake the subject",
     "The student must not miss classes without a valid reason",
     "If a student misses more than 3 classes in a subject during the term, they will be required to retake that subject",
+    "Each lesson lasts 90 minutes",
     "If a student is more than 10 minutes late to a class, they will be marked as absent automatically",
   ],
   modalLinkLabel: "Read more",

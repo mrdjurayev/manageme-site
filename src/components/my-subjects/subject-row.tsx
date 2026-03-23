@@ -33,9 +33,17 @@ function TeacherLine({ teacher }: { teacher: MySubjectTeacher }) {
   );
 }
 
-function ActionButton({ children, className }: { children: ReactNode; className: string }) {
+function ActionButton({
+  children,
+  className,
+  onClick,
+}: {
+  children: ReactNode;
+  className: string;
+  onClick?: () => void;
+}) {
   return (
-    <button type="button" className={className} style={{ border: MY_SUBJECTS_SOFT_BORDER }}>
+    <button type="button" onClick={onClick} className={className} style={{ border: MY_SUBJECTS_SOFT_BORDER }}>
       {children}
     </button>
   );
@@ -47,7 +55,15 @@ const ATTENDANCE_BODY_CELL_CLASS = MY_SUBJECTS_COLUMNS_BY_KEY.attendance.bodyCla
 const ACTION_BODY_CELL_CLASS = MY_SUBJECTS_COLUMNS_BY_KEY.action.bodyClassName;
 const PLAN_BODY_CELL_CLASS = MY_SUBJECTS_COLUMNS_BY_KEY.plan.bodyClassName;
 
-export function MySubjectsTableRow({ subject }: { subject: MySubjectItem }) {
+export function MySubjectsTableRow({
+  subject,
+  onPlanOpen,
+  onAssignmentsOpen,
+}: {
+  subject: MySubjectItem;
+  onPlanOpen: () => void;
+  onAssignmentsOpen: () => void;
+}) {
   return (
     <tr style={{ borderBottom: MY_SUBJECTS_SOFT_BORDER }}>
       <td className={SUBJECT_BODY_CELL_CLASS}>
@@ -61,13 +77,13 @@ export function MySubjectsTableRow({ subject }: { subject: MySubjectItem }) {
         </div>
       </td>
       <td className={ATTENDANCE_BODY_CELL_CLASS}>
-        <div className="flex justify-center">
+        <div className="flex justify-start">
           <ActionButton className={MY_SUBJECTS_ATTENDANCE_BUTTON_CLASS}>{subject.attendance}</ActionButton>
         </div>
       </td>
       <td className={ACTION_BODY_CELL_CLASS}>
-        <div className="flex justify-center">
-          <ActionButton className={MY_SUBJECTS_TASK_BUTTON_CLASS}>
+        <div className="flex justify-start">
+          <ActionButton className={MY_SUBJECTS_TASK_BUTTON_CLASS} onClick={onAssignmentsOpen}>
             <ClipboardList className="shrink-0" size={MY_SUBJECTS_ICON_SIZE} strokeWidth={MY_SUBJECTS_ICON_STROKE_WIDTH} />
             <span>Assignments</span>
           </ActionButton>
@@ -75,11 +91,11 @@ export function MySubjectsTableRow({ subject }: { subject: MySubjectItem }) {
       </td>
       <td className={PLAN_BODY_CELL_CLASS}>
         <div className={MY_SUBJECTS_PLAN_ACTIONS_CLASS}>
-          <ActionButton className={MY_SUBJECTS_ICON_BUTTON_CLASS}>
+          <ActionButton className={MY_SUBJECTS_ICON_BUTTON_CLASS} onClick={onPlanOpen}>
             <CalendarDays size={MY_SUBJECTS_ICON_SIZE} strokeWidth={MY_SUBJECTS_ICON_STROKE_WIDTH} />
           </ActionButton>
           {subject.hasDownload ? (
-            <ActionButton className={MY_SUBJECTS_ICON_BUTTON_CLASS}>
+            <ActionButton className={MY_SUBJECTS_ICON_BUTTON_CLASS} onClick={onPlanOpen}>
               <Download size={MY_SUBJECTS_ICON_SIZE} strokeWidth={MY_SUBJECTS_ICON_STROKE_WIDTH} />
             </ActionButton>
           ) : null}

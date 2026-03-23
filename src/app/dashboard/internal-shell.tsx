@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import {
   Bell,
   BookOpenText,
@@ -29,6 +29,14 @@ import {
   DashboardCardModal,
   type DashboardCardItem,
 } from "@/components/dashboard";
+import {
+  ASSIGNMENT_RECORDS,
+  ASSIGNMENTS_SUBJECT_OPTIONS,
+  getAssignmentsNotificationPreview,
+  type AssignmentsNotificationPreview,
+  type AssignmentSubjectOption,
+  AssignmentsView,
+} from "@/components/assignments";
 import { LessonScheduleCanvas, LessonScheduleToolbar } from "@/components/lesson-schedule";
 import { MySubjectsView } from "@/components/my-subjects";
 
@@ -47,6 +55,7 @@ type DashboardContentView = "cards" | "contract-terms";
 
 type AppHeaderProps = {
   currentTime: string;
+  notificationPreview: AssignmentsNotificationPreview;
   isNotificationMenuOpen: boolean;
   isProfileMenuOpen: boolean;
   notificationRef: RefObject<HTMLDivElement | null>;
@@ -78,13 +87,6 @@ const MENU_ITEMS: MenuItem[] = [
 const PROFILE_INFO = {
   firstName: "Abdullox",
   lastName: "Jurayev",
-};
-
-const NOTIFICATION_PREVIEW = {
-  badgeCount: "1",
-  title: "main deadline title",
-  subtitle: "title of day left",
-  meta: "last period of deadline",
 };
 
 const MOBILE_BREAKPOINT = 1024;
@@ -163,11 +165,12 @@ function isDesktopViewport() {
 function useServerTime(initialServerTimeIso: string, serverTimeZone?: string) {
   const normalizedServerTimeZone = serverTimeZone || "UTC";
   const initialServerEpoch = Date.parse(initialServerTimeIso);
-  const [currentTime, setCurrentTime] = useState(() =>
-    formatServerTime(
-      new Date(Number.isFinite(initialServerEpoch) ? initialServerEpoch : 0),
-      normalizedServerTimeZone,
-    ),
+  const [serverNow, setServerNow] = useState(() =>
+    new Date(Number.isFinite(initialServerEpoch) ? initialServerEpoch : Date.now()),
+  );
+  const currentTime = useMemo(
+    () => formatServerTime(serverNow, normalizedServerTimeZone),
+    [normalizedServerTimeZone, serverNow],
   );
 
   useEffect(() => {
@@ -176,16 +179,20 @@ function useServerTime(initialServerTimeIso: string, serverTimeZone?: string) {
 
     const tick = () => {
       const elapsedMs = Date.now() - startedAtMs;
-      setCurrentTime(formatServerTime(new Date(baseServerMs + elapsedMs), normalizedServerTimeZone));
+      setServerNow(new Date(baseServerMs + elapsedMs));
     };
 
     tick();
 
     const timer = window.setInterval(tick, 30_000);
     return () => window.clearInterval(timer);
-  }, [initialServerEpoch, normalizedServerTimeZone]);
+  }, [initialServerEpoch]);
 
-  return currentTime;
+  return {
+    currentTime,
+    serverNow,
+    timeZone: normalizedServerTimeZone,
+  };
 }
 
 function useBodyScrollLock(locked: boolean) {
@@ -213,24 +220,32 @@ function MobileBackdrop({ open, onClose }: { open: boolean; onClose: () => void 
   );
 }
 
-function NotificationMenu({ open }: { open: boolean }) {
+function NotificationMenu({ open, preview }: { open: boolean; preview: AssignmentsNotificationPreview }) {
   if (!open) {
     return null;
   }
 
+  const hasNotifications = preview.badgeCount !== "0";
+
   return (
     <div className={NOTIFICATION_DROPDOWN_CLASS} style={PANEL_STYLE}>
       <div className="ui-text-body-sm bg-[var(--ui-primary)] p-3 font-bold text-[var(--ui-text-inverse)]">Notifications</div>
-      <div className="flex gap-4 border-b border-[var(--ui-border-subtle)] p-4">
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[var(--ui-surface-muted)] ${SURFACE_TEXT_CLASS}`}>
-          <FileText size={ICON_SIZES.small} strokeWidth={ICON_STROKE_WIDTH} />
+      {hasNotifications ? (
+        <div className="flex gap-4 border-b border-[var(--ui-border-subtle)] p-4">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[var(--ui-surface-muted)] ${SURFACE_TEXT_CLASS}`}>
+            <FileText size={ICON_SIZES.small} strokeWidth={ICON_STROKE_WIDTH} />
+          </div>
+          <div className="flex flex-col">
+            <p className={`ui-text-body-sm font-bold leading-tight ${SURFACE_TEXT_CLASS}`}>{preview.title}</p>
+            <p className={`ui-text-caption mt-1 font-medium ${MUTED_TEXT_CLASS}`}>{preview.subtitle}</p>
+            <p className={`ui-text-meta mt-1 font-normal ${MUTED_TEXT_CLASS}`}>{preview.meta}</p>
+          </div>
         </div>
-        <div className="flex flex-col">
-          <p className={`ui-text-body-sm font-bold leading-tight ${SURFACE_TEXT_CLASS}`}>{NOTIFICATION_PREVIEW.title}</p>
-          <p className={`ui-text-caption mt-1 font-medium ${MUTED_TEXT_CLASS}`}>{NOTIFICATION_PREVIEW.subtitle}</p>
-          <p className={`ui-text-meta mt-1 font-normal ${MUTED_TEXT_CLASS}`}>{NOTIFICATION_PREVIEW.meta}</p>
+      ) : (
+        <div className={`flex min-h-[132px] items-center justify-center p-4 text-center ui-text-body-sm font-medium ${MUTED_TEXT_CLASS}`}>
+          No notifications
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -264,6 +279,7 @@ function ProfileMenu({ open }: { open: boolean }) {
 
 function AppHeader({
   currentTime,
+  notificationPreview,
   isNotificationMenuOpen,
   isProfileMenuOpen,
   notificationRef,
@@ -312,11 +328,13 @@ function AppHeader({
             aria-expanded={isNotificationMenuOpen}
           >
             <Bell size={ICON_SIZES.medium} strokeWidth={ICON_STROKE_WIDTH} />
-            <span className={NOTIFICATION_BADGE_CLASS}>
-              {NOTIFICATION_PREVIEW.badgeCount}
-            </span>
+            {notificationPreview.badgeCount !== "0" ? (
+              <span className={NOTIFICATION_BADGE_CLASS}>
+                {notificationPreview.badgeCount}
+              </span>
+            ) : null}
           </button>
-          <NotificationMenu open={isNotificationMenuOpen} />
+          <NotificationMenu open={isNotificationMenuOpen} preview={notificationPreview} />
         </div>
 
         <button type="button" className={HEADER_ACTION_BUTTON_CLASS} aria-label="Video">
@@ -392,10 +410,13 @@ function Sidebar({ activeMenu, isMobileOpen, isDesktopCollapsed, onSelectMenu }:
 }
 
 export function DashboardShell({ initialServerTimeIso, serverTimeZone }: DashboardShellProps) {
-  const currentTime = useServerTime(initialServerTimeIso, serverTimeZone);
+  const { currentTime, serverNow, timeZone } = useServerTime(initialServerTimeIso, serverTimeZone);
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("Dashboard");
+  const [selectedAssignmentsSubject, setSelectedAssignmentsSubject] = useState<AssignmentSubjectOption>(
+    ASSIGNMENTS_SUBJECT_OPTIONS[0],
+  );
   const [dashboardContentView, setDashboardContentView] = useState<DashboardContentView>("cards");
   const [selectedCard, setSelectedCard] = useState<DashboardCardItem | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -411,6 +432,11 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
     closeNotifications();
     closeProfile();
   }, [closeNotifications, closeProfile]);
+
+  const notificationPreview = useMemo(
+    () => getAssignmentsNotificationPreview(ASSIGNMENT_RECORDS, serverNow),
+    [serverNow],
+  );
 
   useBodyScrollLock(isMobileSidebarOpen || Boolean(selectedCard));
 
@@ -505,12 +531,35 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
     closeTopbarMenus();
   }, [closeMobileSidebar, closeTopbarMenus]);
 
+  const handleContractTermsBack = useCallback(() => {
+    setActiveMenu("Dashboard");
+    setDashboardContentView("cards");
+    setSelectedCard(null);
+    closeMobileSidebar();
+    closeTopbarMenus();
+  }, [closeMobileSidebar, closeTopbarMenus]);
+
+  const handleAssignmentsOpenFromSubject = useCallback((subjectTitle: string) => {
+    const matchingSubject = ASSIGNMENTS_SUBJECT_OPTIONS.find((subject) => subject === subjectTitle);
+
+    if (matchingSubject) {
+      setSelectedAssignmentsSubject(matchingSubject);
+    }
+
+    setActiveMenu("Assignments");
+    setDashboardContentView("cards");
+    setSelectedCard(null);
+    closeMobileSidebar();
+    closeTopbarMenus();
+  }, [closeMobileSidebar, closeTopbarMenus]);
+
   return (
     <div className={APP_SHELL_CLASS}>
       <MobileBackdrop open={isMobileSidebarOpen} onClose={closeMobileSidebar} />
 
       <AppHeader
         currentTime={currentTime}
+        notificationPreview={notificationPreview}
         isNotificationMenuOpen={isNotificationMenuOpen}
         isProfileMenuOpen={isProfileMenuOpen}
         notificationRef={notificationRef}
@@ -539,15 +588,28 @@ export function DashboardShell({ initialServerTimeIso, serverTimeZone }: Dashboa
           ) : null}
 
           {activeMenu === "Dashboard" && dashboardContentView === "contract-terms" ? (
-            <ContractTermsView card={CONTRACT_TERMS_CARD} />
+            <ContractTermsView card={CONTRACT_TERMS_CARD} onBack={handleContractTermsBack} />
           ) : null}
 
-          {activeMenu === "My Subjects" ? <MySubjectsView /> : null}
+          {activeMenu === "My Subjects" ? (
+            <MySubjectsView
+              referenceDate={serverNow}
+              referenceTimeZone={timeZone}
+              onAssignmentsOpen={(subject) => handleAssignmentsOpenFromSubject(subject.title)}
+            />
+          ) : null}
+
+          {activeMenu === "Assignments" ? (
+            <AssignmentsView
+              initialSelectedSubject={selectedAssignmentsSubject}
+              onSelectedSubjectChange={setSelectedAssignmentsSubject}
+            />
+          ) : null}
 
           {activeMenu === "Lesson Schedule" ? (
             <div className="min-h-0 flex flex-1 flex-col gap-0 pb-4 pt-0 lg:pb-0">
               <LessonScheduleToolbar />
-              <LessonScheduleCanvas className="min-h-0 flex-1" />
+              <LessonScheduleCanvas className="min-h-0 flex-1" referenceDate={serverNow} referenceTimeZone={timeZone} />
             </div>
           ) : null}
         </main>
